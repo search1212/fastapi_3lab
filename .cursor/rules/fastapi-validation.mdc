@@ -1,0 +1,12 @@
+---
+description: Enforce FastAPI and Pydantic validation rules
+alwaysApply: true
+---
+
+# FastAPI Validation Standards
+
+- All request body, query params, path params, and response contracts must be defined through `Pydantic` models or typed FastAPI dependencies.
+- Avoid manual validation in route handlers when the same checks can be expressed via `Pydantic` field constraints, validators, and schema types.
+- Keep API-level validation close to transport layer (routers/schemas), and use domain services for business rules.
+- New endpoints must explicitly declare `response_model`.
+- Do not accept or return untyped dictionaries for public API contracts.

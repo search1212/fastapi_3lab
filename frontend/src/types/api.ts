@@ -39,3 +39,19 @@ export interface PostRead {
   created_at: string
   updated_at: string
 }
+
+export interface UserUpdateMe {
+  username?: string
+  bio?: string
+  avatar_url?: string
+}
+
+export interface PostCreateRequest {
+  content: string
+}
+
+export interface PostUpdateRequest {
+  content: string
+}
+
+export type ReactionType = 'like' | 'heart' | 'fire' | 'laugh'

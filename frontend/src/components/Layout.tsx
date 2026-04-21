@@ -15,12 +15,32 @@ export function Layout() {
             <NavLink to="/" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
               Лента
             </NavLink>
-            <NavLink to="/register" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
-              Регистрация
-            </NavLink>
-            <NavLink to="/login" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
-              Вход
-            </NavLink>
+            {isAuthenticated && (
+              <>
+                <NavLink to="/following" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
+                  Подписки
+                </NavLink>
+                <NavLink to="/my-posts" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
+                  Мои посты
+                </NavLink>
+                <NavLink to="/search" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
+                  Поиск
+                </NavLink>
+                <NavLink to="/me" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
+                  Профиль
+                </NavLink>
+              </>
+            )}
+            {!isAuthenticated && (
+              <>
+                <NavLink to="/register" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
+                  Регистрация
+                </NavLink>
+                <NavLink to="/login" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
+                  Вход
+                </NavLink>
+              </>
+            )}
             {isAuthenticated && (
               <button type="button" onClick={logout} className="ghost-button">
                 Выйти

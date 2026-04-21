@@ -63,6 +63,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .menu-button {
@@ -174,6 +176,26 @@ button:disabled {
   white-space: pre-wrap;
 }
 
+.post-actions {
+  margin-top: 0.75rem;
+}
+
+.reaction-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.small {
+  padding: 0.35rem 0.55rem;
+  font-size: 0.8rem;
+}
+
+.active-reaction {
+  border-color: #ff8c00;
+  color: #ff8c00;
+}
+
 .meta {
   margin-top: 0.75rem;
   display: flex;
@@ -215,4 +237,9 @@ button:disabled {
 
 .hint.bad {
   color: #ff6b6b;
+}
+
+.action-row {
+  display: flex;
+  gap: 0.6rem;
 }

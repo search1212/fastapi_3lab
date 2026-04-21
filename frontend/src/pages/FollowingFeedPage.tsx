@@ -113,7 +113,6 @@ export function FollowingFeedPage() {
 
   return (
     <section>
-      <h2>Лента подписок</h2>
       <PageState
         loading={isLoading ? 'Загружаем посты...' : undefined}
         error={error}

@@ -36,8 +36,7 @@ export function SearchUsersPage() {
 
   return (
     <section>
-      <h2>Поиск пользователей</h2>
-      <GlassCard className="form">
+      <GlassCard className="search-panel">
         <FormField label="Username или email">
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Введите запрос" />
         </FormField>
@@ -47,15 +46,27 @@ export function SearchUsersPage() {
         error={error}
         empty={!isLoading && query && results.length === 0 ? 'Ничего не найдено.' : null}
       />
-      <div className="stack">
+      <div className="search-results">
         {results.map((user) => (
-          <GlassCard key={user.id}>
-            <p>{user.username}</p>
-            <p className="muted">{user.email}</p>
-            <Link className="menu-button" to={`/users/${user.id}`}>
-              Открыть профиль
-            </Link>
-          </GlassCard>
+          <Link key={user.id} className="search-user-link" to={`/users/${user.id}`}>
+            <GlassCard className="search-user-card">
+              <div className="search-user-head">
+                {user.avatar_url ? (
+                  <img className="search-user-avatar" src={user.avatar_url} alt={`Аватар ${user.username}`} />
+                ) : (
+                  <span className="search-user-avatar search-user-avatar-fallback">{user.username.slice(0, 1).toUpperCase()}</span>
+                )}
+                <div className="search-user-main">
+                  <strong>@{user.username}</strong>
+                  <p className="muted">{user.email}</p>
+                </div>
+              </div>
+              <p className="search-user-bio">{user.bio || 'Пользователь пока не добавил описание.'}</p>
+              <div className="meta">
+                <span>На сайте с {new Date(user.created_at).toLocaleDateString()}</span>
+              </div>
+            </GlassCard>
+          </Link>
         ))}
       </div>
     </section>

@@ -66,7 +66,6 @@ export function MyProfilePage() {
 
   return (
     <section>
-      <h2>Мой профиль</h2>
       <PageState loading={isLoading ? 'Загрузка профиля...' : undefined} error={error} />
       {!isLoading && profile && (
         <GlassCard className="profile-card">

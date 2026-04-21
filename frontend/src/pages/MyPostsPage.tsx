@@ -77,7 +77,6 @@ export function MyPostsPage() {
 
   return (
     <section>
-      <h2>Мои посты</h2>
       <GlassCard>
         <form className="form" onSubmit={onCreate}>
           <FormField label="Новый пост">

@@ -64,22 +64,42 @@ export function UserProfilePage() {
 
   return (
     <section>
-      <h2>Профиль пользователя</h2>
       <PageState loading={isLoading ? 'Загрузка...' : undefined} error={error} />
       {!isLoading && profile && (
-        <GlassCard className="form">
-          <p>
-            <strong>{profile.username}</strong>
-          </p>
-          <p className="muted">{profile.email}</p>
-          <p>{profile.bio ?? 'Нет описания'}</p>
-          <div className="meta">
-            <span>Подписчики: {followersCount}</span>
-            <span>Подписки: {followingCount}</span>
+        <GlassCard className="user-profile-card">
+          <div className="user-profile-main">
+            <div className="user-profile-head">
+              {profile.avatar_url ? (
+                <img className="user-profile-avatar" src={profile.avatar_url} alt={`Аватар ${profile.username}`} />
+              ) : (
+                <span className="user-profile-avatar user-profile-avatar-fallback">
+                  {profile.username.slice(0, 1).toUpperCase()}
+                </span>
+              )}
+              <div className="user-profile-title">
+                <strong>@{profile.username}</strong>
+                <p className="muted">{profile.email}</p>
+              </div>
+            </div>
+            <p className="user-profile-bio">{profile.bio ?? 'Пользователь пока не добавил описание.'}</p>
+            <div className="user-profile-stats">
+              <span className="stat-pill">Подписчики: {followersCount}</span>
+              <span className="stat-pill">Подписки: {followingCount}</span>
+              <span className="stat-pill">На сайте с {new Date(profile.created_at).toLocaleDateString()}</span>
+            </div>
+            <div className="action-row user-profile-actions">
+              <PrimaryButton type="button" className="user-profile-follow-btn" onClick={onToggleFollow}>
+                {isFollowing ? 'Отписаться' : 'Подписаться'}
+              </PrimaryButton>
+            </div>
           </div>
-          <PrimaryButton type="button" onClick={onToggleFollow}>
-            {isFollowing ? 'Отписаться' : 'Подписаться'}
-          </PrimaryButton>
+          <div className="profile-photo-wrap">
+            {profile.avatar_url ? (
+              <img className="profile-photo" src={profile.avatar_url} alt={`Фото ${profile.username}`} />
+            ) : (
+              <div className="profile-photo-placeholder">Нет фото</div>
+            )}
+          </div>
         </GlassCard>
       )}
     </section>

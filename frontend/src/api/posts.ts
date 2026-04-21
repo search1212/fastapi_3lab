@@ -1,5 +1,5 @@
 import { apiRequest } from './client'
-import type { PostCreateRequest, PostRead, PostUpdateRequest, ReactionType } from '../types/api'
+import type { PostCreateRequest, PostRead, PostUpdateRequest, ReactionRead, ReactionType } from '../types/api'
 
 export async function getGlobalFeed(): Promise<PostRead[]> {
   return apiRequest<PostRead[]>('/posts/feed/global', { method: 'GET' })
@@ -21,7 +21,7 @@ export async function createPost(payload: PostCreateRequest, token: string): Pro
   })
 }
 
-export async function updatePost(postId: string, payload: PostUpdateRequest, token: string): Promise<PostRead> {
+export async function updatePost(postId: number, payload: PostUpdateRequest, token: string): Promise<PostRead> {
   return apiRequest<PostRead>(`/posts/${postId}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
@@ -29,7 +29,7 @@ export async function updatePost(postId: string, payload: PostUpdateRequest, tok
   })
 }
 
-export async function setReaction(postId: string, reactionType: ReactionType, token: string): Promise<void> {
+export async function setReaction(postId: number, reactionType: ReactionType, token: string): Promise<void> {
   return apiRequest<void>(`/posts/${postId}/reaction`, {
     method: 'PUT',
     body: JSON.stringify({ reaction_type: reactionType }),
@@ -37,9 +37,16 @@ export async function setReaction(postId: string, reactionType: ReactionType, to
   })
 }
 
-export async function removeReaction(postId: string, token: string): Promise<void> {
+export async function removeReaction(postId: number, token: string): Promise<void> {
   return apiRequest<void>(`/posts/${postId}/reaction`, {
     method: 'DELETE',
+    token,
+  })
+}
+
+export async function getMyReactions(token: string): Promise<ReactionRead[]> {
+  return apiRequest<ReactionRead[]>('/posts/reactions/me', {
+    method: 'GET',
     token,
   })
 }

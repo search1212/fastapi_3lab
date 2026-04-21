@@ -4,6 +4,9 @@ import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
 import { followUser, getFollowers, getFollowing, getMe, getUserById, unfollowUser } from '../api/users'
 import type { UserPublic } from '../types/api'
+import { PrimaryButton } from '../components/ui/Buttons'
+import { GlassCard } from '../components/ui/GlassCard'
+import { PageState } from '../components/ui/PageState'
 
 export function UserProfilePage() {
   const { userId = '' } = useParams()
@@ -16,15 +19,16 @@ export function UserProfilePage() {
   const [error, setError] = useState<string | null>(null)
 
   const load = async () => {
-    if (!accessToken || !userId) return
+    const parsedUserId = Number(userId)
+    if (!accessToken || !userId || Number.isNaN(parsedUserId)) return
     setIsLoading(true)
     setError(null)
     try {
       const [user, me, followers, following] = await Promise.all([
-        getUserById(userId, accessToken),
+        getUserById(parsedUserId, accessToken),
         getMe(accessToken),
-        getFollowers(userId, accessToken),
-        getFollowing(userId, accessToken),
+        getFollowers(parsedUserId, accessToken),
+        getFollowing(parsedUserId, accessToken),
       ])
       setProfile(user)
       setFollowersCount(followers.length)
@@ -61,10 +65,9 @@ export function UserProfilePage() {
   return (
     <section>
       <h2>Профиль пользователя</h2>
-      {isLoading && <p className="muted">Загрузка...</p>}
-      {error && <p className="error">{error}</p>}
+      <PageState loading={isLoading ? 'Загрузка...' : undefined} error={error} />
       {!isLoading && profile && (
-        <article className="card form">
+        <GlassCard className="form">
           <p>
             <strong>{profile.username}</strong>
           </p>
@@ -74,10 +77,10 @@ export function UserProfilePage() {
             <span>Подписчики: {followersCount}</span>
             <span>Подписки: {followingCount}</span>
           </div>
-          <button type="button" onClick={onToggleFollow}>
+          <PrimaryButton type="button" onClick={onToggleFollow}>
             {isFollowing ? 'Отписаться' : 'Подписаться'}
-          </button>
-        </article>
+          </PrimaryButton>
+        </GlassCard>
       )}
     </section>
   )

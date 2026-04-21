@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,7 +16,7 @@ class PostService:
         await self.session.commit()
         return post
 
-    async def edit_post(self, current_user: User, post_id: uuid.UUID, payload: PostUpdate) -> Post:
+    async def edit_post(self, current_user: User, post_id: int, payload: PostUpdate) -> Post:
         post = await self.post_repo.get_by_id(post_id)
         if post is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")

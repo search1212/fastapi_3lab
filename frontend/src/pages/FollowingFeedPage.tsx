@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import { ApiError } from '../api/client'
-import { getFollowingFeed, removeReaction, setReaction } from '../api/posts'
+import { getFollowingFeed, getMyReactions, removeReaction, setReaction } from '../api/posts'
 import { useAuth } from '../auth/AuthContext'
 import { PostCard } from '../components/PostCard'
+import { PageState } from '../components/ui/PageState'
 import type { PostRead, ReactionType } from '../types/api'
 
 export function FollowingFeedPage() {
   const { accessToken } = useAuth()
   const [posts, setPosts] = useState<PostRead[]>([])
-  const [reactions, setReactions] = useState<Record<string, ReactionType | null>>({})
+  const [reactions, setReactions] = useState<Record<number, ReactionType | null>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -19,6 +20,13 @@ export function FollowingFeedPage() {
       setError(null)
       try {
         setPosts(await getFollowingFeed(accessToken))
+        const existingReactions = await getMyReactions(accessToken)
+        setReactions(
+          Object.fromEntries(existingReactions.map((item) => [item.post_id, item.reaction_type])) as Record<
+            number,
+            ReactionType | null
+          >,
+        )
       } catch (err) {
         setError(err instanceof ApiError ? err.message : 'Не удалось загрузить ленту подписок')
       } finally {
@@ -28,7 +36,7 @@ export function FollowingFeedPage() {
     run()
   }, [accessToken])
 
-  const onReact = async (postId: string, reaction: ReactionType) => {
+  const onReact = async (postId: number, reaction: ReactionType) => {
     if (!accessToken) return
     try {
       await setReaction(postId, reaction, accessToken)
@@ -38,7 +46,7 @@ export function FollowingFeedPage() {
     }
   }
 
-  const onRemoveReaction = async (postId: string) => {
+  const onRemoveReaction = async (postId: number) => {
     if (!accessToken) return
     try {
       await removeReaction(postId, accessToken)
@@ -51,9 +59,11 @@ export function FollowingFeedPage() {
   return (
     <section>
       <h2>Лента подписок</h2>
-      {isLoading && <p className="muted">Загружаем посты...</p>}
-      {error && <p className="error">{error}</p>}
-      {!isLoading && !error && posts.length === 0 && <p className="muted">Пока нет постов от ваших подписок.</p>}
+      <PageState
+        loading={isLoading ? 'Загружаем посты...' : undefined}
+        error={error}
+        empty={!isLoading && !error && posts.length === 0 ? 'Пока нет постов от ваших подписок.' : null}
+      />
       <div className="stack">
         {posts.map((post) => (
           <PostCard

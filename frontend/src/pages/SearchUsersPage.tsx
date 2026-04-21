@@ -4,6 +4,9 @@ import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
 import { searchUsers } from '../api/users'
 import type { UserPublic } from '../types/api'
+import { FormField } from '../components/ui/FormField'
+import { GlassCard } from '../components/ui/GlassCard'
+import { PageState } from '../components/ui/PageState'
 
 export function SearchUsersPage() {
   const { accessToken } = useAuth()
@@ -34,24 +37,25 @@ export function SearchUsersPage() {
   return (
     <section>
       <h2>Поиск пользователей</h2>
-      <div className="card form">
-        <label>
-          Username или email
+      <GlassCard className="form">
+        <FormField label="Username или email">
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Введите запрос" />
-        </label>
-      </div>
-      {isLoading && <p className="muted">Ищем...</p>}
-      {error && <p className="error">{error}</p>}
-      {!isLoading && query && results.length === 0 && <p className="muted">Ничего не найдено.</p>}
+        </FormField>
+      </GlassCard>
+      <PageState
+        loading={isLoading ? 'Ищем...' : undefined}
+        error={error}
+        empty={!isLoading && query && results.length === 0 ? 'Ничего не найдено.' : null}
+      />
       <div className="stack">
         {results.map((user) => (
-          <article className="card" key={user.id}>
+          <GlassCard key={user.id}>
             <p>{user.username}</p>
             <p className="muted">{user.email}</p>
             <Link className="menu-button" to={`/users/${user.id}`}>
               Открыть профиль
             </Link>
-          </article>
+          </GlassCard>
         ))}
       </div>
     </section>

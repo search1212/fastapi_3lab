@@ -3,6 +3,10 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { checkEmailAvailability, checkUsernameAvailability, registerUser } from '../api/auth'
 import { ApiError } from '../api/client'
+import { PrimaryButton } from '../components/ui/Buttons'
+import { FormField } from '../components/ui/FormField'
+import { GlassCard } from '../components/ui/GlassCard'
+import { PageState } from '../components/ui/PageState'
 
 type ValidationStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
 
@@ -88,14 +92,24 @@ export function RegisterPage() {
   return (
     <section className="auth-page">
       <h2>Регистрация</h2>
-      <form className="card form" onSubmit={onSubmit}>
-        <label>
-          Email
+      <GlassCard>
+        <form className="form" onSubmit={onSubmit}>
+          <FormField
+            label="Email"
+            hint={<ValidationHint status={emailStatus} takenText="Этот email уже занят." invalidText="Введите корректный email." />}
+          >
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <ValidationHint status={emailStatus} takenText="Этот email уже занят." invalidText="Введите корректный email." />
-        </label>
-        <label>
-          Имя пользователя
+          </FormField>
+          <FormField
+            label="Имя пользователя"
+            hint={
+              <ValidationHint
+                status={usernameStatus}
+                takenText="Это имя пользователя уже занято."
+                invalidText="Минимум 3 символа."
+              />
+            }
+          >
           <input
             type="text"
             value={username}
@@ -104,14 +118,8 @@ export function RegisterPage() {
             maxLength={50}
             required
           />
-          <ValidationHint
-            status={usernameStatus}
-            takenText="Это имя пользователя уже занято."
-            invalidText="Минимум 3 символа."
-          />
-        </label>
-        <label>
-          Пароль
+          </FormField>
+          <FormField label="Пароль">
           <input
             type="password"
             value={password}
@@ -120,20 +128,17 @@ export function RegisterPage() {
             maxLength={128}
             required
           />
-        </label>
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Создаем аккаунт...' : 'Создать аккаунт'}
-        </button>
-        {error && <p className="error">{error}</p>}
-        {isSuccess && (
-          <p className="success">
-            Регистрация успешна. Перенаправляем на вход...
+          </FormField>
+          <PrimaryButton type="submit" disabled={isLoading}>
+            {isLoading ? 'Создаем аккаунт...' : 'Создать аккаунт'}
+          </PrimaryButton>
+          <PageState error={error} />
+          {isSuccess && <p className="success">Регистрация успешна. Перенаправляем на вход...</p>}
+          <p className="muted">
+            Уже есть аккаунт? <Link to="/login">Войти</Link>
           </p>
-        )}
-        <p className="muted">
-          Уже есть аккаунт? <Link to="/login">Войти</Link>
-        </p>
-      </form>
+        </form>
+      </GlassCard>
     </section>
   )
 }

@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,7 +5,7 @@ from app.api.deps import get_current_user
 from app.db.models import User
 from app.db.session import get_db_session
 from app.schemas.post import PostCreate, PostRead, PostUpdate
-from app.schemas.reaction import ReactionUpdate
+from app.schemas.reaction import ReactionRead, ReactionUpdate
 from app.services.post_service import PostService
 from app.services.social_service import SocialService
 
@@ -26,7 +24,7 @@ async def create_post(
 
 @router.patch("/{post_id}", response_model=PostRead)
 async def update_post(
-    post_id: uuid.UUID,
+    post_id: int,
     payload: PostUpdate,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
@@ -59,9 +57,18 @@ async def following_feed(
     return [PostRead.model_validate(post) for post in posts]
 
 
+@router.get("/reactions/me", response_model=list[ReactionRead])
+async def my_reactions(
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> list[ReactionRead]:
+    reactions = await SocialService(session).list_user_reactions(current_user)
+    return [ReactionRead(post_id=item.post_id, reaction_type=item.reaction_type) for item in reactions]
+
+
 @router.put("/{post_id}/reaction", status_code=status.HTTP_204_NO_CONTENT)
 async def put_reaction(
-    post_id: uuid.UUID,
+    post_id: int,
     payload: ReactionUpdate,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
@@ -71,7 +78,7 @@ async def put_reaction(
 
 @router.delete("/{post_id}/reaction", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_reaction(
-    post_id: uuid.UUID,
+    post_id: int,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> None:

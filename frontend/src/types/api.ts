@@ -22,7 +22,7 @@ export interface AvailabilityResponse {
 }
 
 export interface UserPublic {
-  id: string
+  id: number
   email: string
   username: string
   bio: string | null
@@ -32,8 +32,8 @@ export interface UserPublic {
 }
 
 export interface PostRead {
-  id: string
-  author_id: string
+  id: number
+  author_id: number
   content: string
   is_edited: boolean
   created_at: string
@@ -55,3 +55,8 @@ export interface PostUpdateRequest {
 }
 
 export type ReactionType = 'like' | 'heart' | 'fire' | 'laugh'
+
+export interface ReactionRead {
+  post_id: number
+  reaction_type: ReactionType
+}

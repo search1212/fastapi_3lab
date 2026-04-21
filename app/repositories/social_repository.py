@@ -1,5 +1,3 @@
-import uuid
-
 from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +9,7 @@ class SocialRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def follow(self, follower_id: uuid.UUID, followed_id: uuid.UUID) -> Subscription:
+    async def follow(self, follower_id: int, followed_id: int) -> Subscription:
         existing = await self.session.execute(
             select(Subscription).where(
                 Subscription.follower_id == follower_id,
@@ -26,7 +24,7 @@ class SocialRepository:
         await self.session.flush()
         return follow
 
-    async def unfollow(self, follower_id: uuid.UUID, followed_id: uuid.UUID) -> None:
+    async def unfollow(self, follower_id: int, followed_id: int) -> None:
         await self.session.execute(
             delete(Subscription).where(
                 Subscription.follower_id == follower_id,
@@ -35,7 +33,7 @@ class SocialRepository:
         )
         await self.session.flush()
 
-    async def list_followers(self, user_id: uuid.UUID, limit: int = 50) -> list[User]:
+    async def list_followers(self, user_id: int, limit: int = 50) -> list[User]:
         result = await self.session.execute(
             select(User)
             .join(Subscription, Subscription.follower_id == User.id)
@@ -44,7 +42,7 @@ class SocialRepository:
         )
         return list(result.scalars().all())
 
-    async def list_following(self, user_id: uuid.UUID, limit: int = 50) -> list[User]:
+    async def list_following(self, user_id: int, limit: int = 50) -> list[User]:
         result = await self.session.execute(
             select(User)
             .join(Subscription, Subscription.followed_id == User.id)
@@ -53,7 +51,7 @@ class SocialRepository:
         )
         return list(result.scalars().all())
 
-    async def set_reaction(self, user_id: uuid.UUID, post_id: uuid.UUID, reaction_type: ReactionType) -> Reaction:
+    async def set_reaction(self, user_id: int, post_id: int, reaction_type: ReactionType) -> Reaction:
         result = await self.session.execute(
             select(Reaction).where(and_(Reaction.user_id == user_id, Reaction.post_id == post_id))
         )
@@ -66,7 +64,11 @@ class SocialRepository:
         await self.session.flush()
         return reaction
 
-    async def remove_reaction(self, user_id: uuid.UUID, post_id: uuid.UUID) -> None:
+    async def remove_reaction(self, user_id: int, post_id: int) -> None:
         await self.session.execute(delete(Reaction).where(Reaction.user_id == user_id, Reaction.post_id == post_id))
         await self.session.flush()
+
+    async def list_user_reactions(self, user_id: int) -> list[Reaction]:
+        result = await self.session.execute(select(Reaction).where(Reaction.user_id == user_id))
+        return list(result.scalars().all())
 

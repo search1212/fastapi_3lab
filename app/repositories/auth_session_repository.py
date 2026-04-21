@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 
 from sqlalchemy import select
@@ -14,7 +13,7 @@ class AuthSessionRepository:
     async def create(
         self,
         *,
-        user_id: uuid.UUID,
+        user_id: int,
         refresh_token_hash: str,
         expires_at: datetime,
         user_agent: str | None,

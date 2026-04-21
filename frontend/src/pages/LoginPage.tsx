@@ -4,6 +4,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { loginUser } from '../api/auth'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
+import { GlassCard } from '../components/ui/GlassCard'
+import { FormField } from '../components/ui/FormField'
+import { PrimaryButton } from '../components/ui/Buttons'
+import { PageState } from '../components/ui/PageState'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -36,23 +40,23 @@ export function LoginPage() {
   return (
     <section className="auth-page">
       <h2>Вход</h2>
-      <form className="card form" onSubmit={onSubmit}>
-        <label>
-          Email
+      <GlassCard>
+        <form className="form" onSubmit={onSubmit}>
+          <FormField label="Email">
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
-        <label>
-          Пароль
+          </FormField>
+          <FormField label="Пароль">
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </label>
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Входим...' : 'Войти'}
-        </button>
-        {error && <p className="error">{error}</p>}
-        <p className="muted">
-          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
-        </p>
-      </form>
+          </FormField>
+          <PrimaryButton type="submit" disabled={isLoading}>
+            {isLoading ? 'Входим...' : 'Войти'}
+          </PrimaryButton>
+          <PageState error={error} />
+          <p className="muted">
+            Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+          </p>
+        </form>
+      </GlassCard>
     </section>
   )
 }

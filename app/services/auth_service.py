@@ -1,5 +1,4 @@
 import hashlib
-import uuid
 from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
@@ -98,7 +97,7 @@ class AuthService:
             await self.auth_session_repo.revoke(auth_session, revoked_at=datetime.now(UTC))
             await self.session.commit()
 
-    async def _issue_tokens(self, user_id: uuid.UUID, *, user_agent: str | None, ip_address: str | None) -> AuthResponse:
+    async def _issue_tokens(self, user_id: int, *, user_agent: str | None, ip_address: str | None) -> AuthResponse:
         access_token = create_access_token(user_id)
         refresh_token = create_refresh_token(user_id)
         refresh_expires_at = datetime.now(UTC) + timedelta(days=settings.refresh_token_ttl_days)

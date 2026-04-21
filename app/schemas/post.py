@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -15,8 +14,8 @@ class PostUpdate(BaseModel):
 class PostRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: uuid.UUID
-    author_id: uuid.UUID
+    id: int
+    author_id: int
     content: str
     is_edited: bool
     created_at: datetime

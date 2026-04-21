@@ -1,7 +1,6 @@
-import uuid
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Text, Uuid, func
+from sqlalchemy import ForeignKey, Integer, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -10,9 +9,9 @@ from app.db.base import Base
 class Post(Base):
     __tablename__ = "posts"
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid(), primary_key=True, default=uuid.uuid4)
-    author_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    author_id: Mapped[int] = mapped_column(
+        Integer,
         ForeignKey("users.id", ondelete="CASCADE"),
         index=True,
         nullable=False,

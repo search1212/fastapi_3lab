@@ -1,7 +1,6 @@
-import uuid
 from datetime import datetime
 
-from sqlalchemy import Enum, ForeignKey, Index, Uuid, func
+from sqlalchemy import Enum, ForeignKey, Index, Integer, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -12,13 +11,13 @@ class Reaction(Base):
     __tablename__ = "reactions"
     __table_args__ = (Index("ix_reactions_post_id_reaction_type", "post_id", "reaction_type"),)
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+    user_id: Mapped[int] = mapped_column(
+        Integer,
         ForeignKey("users.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    post_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(),
+    post_id: Mapped[int] = mapped_column(
+        Integer,
         ForeignKey("posts.id", ondelete="CASCADE"),
         primary_key=True,
     )

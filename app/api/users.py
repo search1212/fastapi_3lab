@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,14 +36,14 @@ async def search_users(
 
 
 @router.get("/{user_id}", response_model=UserPublic)
-async def get_user_profile(user_id: uuid.UUID, session: AsyncSession = Depends(get_db_session)) -> UserPublic:
+async def get_user_profile(user_id: int, session: AsyncSession = Depends(get_db_session)) -> UserPublic:
     user = await UserService(session).get_user_or_404(user_id)
     return UserPublic.model_validate(user)
 
 
 @router.post("/{user_id}/follow", status_code=status.HTTP_204_NO_CONTENT)
 async def follow_user(
-    user_id: uuid.UUID,
+    user_id: int,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> None:
@@ -54,7 +52,7 @@ async def follow_user(
 
 @router.delete("/{user_id}/follow", status_code=status.HTTP_204_NO_CONTENT)
 async def unfollow_user(
-    user_id: uuid.UUID,
+    user_id: int,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> None:
@@ -62,13 +60,13 @@ async def unfollow_user(
 
 
 @router.get("/{user_id}/followers", response_model=list[UserPublic])
-async def followers(user_id: uuid.UUID, session: AsyncSession = Depends(get_db_session)) -> list[UserPublic]:
+async def followers(user_id: int, session: AsyncSession = Depends(get_db_session)) -> list[UserPublic]:
     users = await SocialService(session).list_followers(user_id)
     return [UserPublic.model_validate(user) for user in users]
 
 
 @router.get("/{user_id}/following", response_model=list[UserPublic])
-async def following(user_id: uuid.UUID, session: AsyncSession = Depends(get_db_session)) -> list[UserPublic]:
+async def following(user_id: int, session: AsyncSession = Depends(get_db_session)) -> list[UserPublic]:
     users = await SocialService(session).list_following(user_id)
     return [UserPublic.model_validate(user) for user in users]
 

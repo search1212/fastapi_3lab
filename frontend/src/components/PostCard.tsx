@@ -1,4 +1,6 @@
 import type { PostRead, ReactionType } from '../types/api'
+import { PrimaryButton, SecondaryButton } from './ui/Buttons'
+import { GlassCard } from './ui/GlassCard'
 
 interface PostCardProps {
   post: PostRead
@@ -10,8 +12,15 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, editable = false, onEdit, reaction = null, onReact, onRemoveReaction }: PostCardProps) {
+  const reactionMap: Array<{ value: ReactionType; emoji: string; label: string }> = [
+    { value: 'like', emoji: '👍', label: 'Нравится' },
+    { value: 'heart', emoji: '❤️', label: 'Любовь' },
+    { value: 'fire', emoji: '🔥', label: 'Огонь' },
+    { value: 'laugh', emoji: '😂', label: 'Смешно' },
+  ]
+
   return (
-    <article className="card">
+    <GlassCard className="post-card">
       <p className="content-text">{post.content}</p>
       <div className="meta">
         <span>Автор: {post.author_id}</span>
@@ -20,30 +29,31 @@ export function PostCard({ post, editable = false, onEdit, reaction = null, onRe
       </div>
       <div className="post-actions">
         {editable && onEdit && (
-          <button type="button" className="ghost-button small" onClick={() => onEdit(post)}>
+          <SecondaryButton type="button" className="small" onClick={() => onEdit(post)}>
             Редактировать
-          </button>
+          </SecondaryButton>
         )}
         {onReact && (
           <div className="reaction-row">
-            {(['like', 'heart', 'fire', 'laugh'] as ReactionType[]).map((value) => (
-              <button
+            {reactionMap.map((item) => (
+              <SecondaryButton
                 type="button"
-                key={value}
-                className={`ghost-button small ${reaction === value ? 'active-reaction' : ''}`}
-                onClick={() => onReact(value)}
+                key={item.value}
+                className={`small emoji-pill ${reaction === item.value ? 'active-reaction' : ''}`}
+                onClick={() => onReact(item.value)}
+                title={item.label}
               >
-                {value}
-              </button>
+                <span>{item.emoji}</span>
+              </SecondaryButton>
             ))}
             {reaction && onRemoveReaction && (
-              <button type="button" className="ghost-button small" onClick={onRemoveReaction}>
+              <PrimaryButton type="button" className="small" onClick={onRemoveReaction}>
                 убрать
-              </button>
+              </PrimaryButton>
             )}
           </div>
         )}
       </div>
-    </article>
+    </GlassCard>
   )
 }

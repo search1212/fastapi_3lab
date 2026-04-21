@@ -1,5 +1,5 @@
-import uuid
 from datetime import UTC, datetime, timedelta
+import uuid
 
 from jose import JWTError, jwt
 
@@ -8,7 +8,7 @@ from app.core.config import get_settings
 settings = get_settings()
 
 
-def _encode_token(user_id: uuid.UUID, token_type: str, expires_delta: timedelta) -> str:
+def _encode_token(user_id: int, token_type: str, expires_delta: timedelta) -> str:
     now = datetime.now(UTC)
     payload = {
         "sub": str(user_id),
@@ -20,11 +20,11 @@ def _encode_token(user_id: uuid.UUID, token_type: str, expires_delta: timedelta)
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
 
-def create_access_token(user_id: uuid.UUID) -> str:
+def create_access_token(user_id: int) -> str:
     return _encode_token(user_id, "access", timedelta(minutes=settings.access_token_ttl_minutes))
 
 
-def create_refresh_token(user_id: uuid.UUID) -> str:
+def create_refresh_token(user_id: int) -> str:
     return _encode_token(user_id, "refresh", timedelta(days=settings.refresh_token_ttl_days))
 
 

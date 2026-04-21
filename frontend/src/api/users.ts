@@ -18,22 +18,22 @@ export async function searchUsers(query: string, token: string): Promise<UserPub
   return apiRequest<UserPublic[]>(`/users/search?${q}`, { method: 'GET', token })
 }
 
-export async function getUserById(userId: string, token: string): Promise<UserPublic> {
+export async function getUserById(userId: number, token: string): Promise<UserPublic> {
   return apiRequest<UserPublic>(`/users/${userId}`, { method: 'GET', token })
 }
 
-export async function followUser(userId: string, token: string): Promise<void> {
+export async function followUser(userId: number, token: string): Promise<void> {
   return apiRequest<void>(`/users/${userId}/follow`, { method: 'POST', token })
 }
 
-export async function unfollowUser(userId: string, token: string): Promise<void> {
+export async function unfollowUser(userId: number, token: string): Promise<void> {
   return apiRequest<void>(`/users/${userId}/follow`, { method: 'DELETE', token })
 }
 
-export async function getFollowers(userId: string, token: string): Promise<UserPublic[]> {
+export async function getFollowers(userId: number, token: string): Promise<UserPublic[]> {
   return apiRequest<UserPublic[]>(`/users/${userId}/followers`, { method: 'GET', token })
 }
 
-export async function getFollowing(userId: string, token: string): Promise<UserPublic[]> {
+export async function getFollowing(userId: number, token: string): Promise<UserPublic[]> {
   return apiRequest<UserPublic[]>(`/users/${userId}/following`, { method: 'GET', token })
 }

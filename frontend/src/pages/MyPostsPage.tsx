@@ -4,13 +4,17 @@ import { ApiError } from '../api/client'
 import { createPost, getMyPosts, updatePost } from '../api/posts'
 import { useAuth } from '../auth/AuthContext'
 import { PostCard } from '../components/PostCard'
+import { PrimaryButton, SecondaryButton } from '../components/ui/Buttons'
+import { FormField } from '../components/ui/FormField'
+import { GlassCard } from '../components/ui/GlassCard'
+import { PageState } from '../components/ui/PageState'
 import type { PostRead } from '../types/api'
 
 export function MyPostsPage() {
   const { accessToken } = useAuth()
   const [posts, setPosts] = useState<PostRead[]>([])
   const [content, setContent] = useState('')
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [editingContent, setEditingContent] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -69,36 +73,38 @@ export function MyPostsPage() {
   return (
     <section>
       <h2>Мои посты</h2>
-      <form className="card form" onSubmit={onCreate}>
-        <label>
-          Новый пост
+      <GlassCard>
+        <form className="form" onSubmit={onCreate}>
+          <FormField label="Новый пост">
           <input value={content} onChange={(e) => setContent(e.target.value)} maxLength={5000} />
-        </label>
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Публикуем...' : 'Опубликовать'}
-        </button>
-      </form>
+          </FormField>
+          <PrimaryButton type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Публикуем...' : 'Опубликовать'}
+          </PrimaryButton>
+        </form>
+      </GlassCard>
 
       {editingId && (
-        <div className="card form">
-          <label>
-            Редактирование поста
+        <GlassCard className="form">
+          <FormField label="Редактирование поста">
             <input value={editingContent} onChange={(e) => setEditingContent(e.target.value)} maxLength={5000} />
-          </label>
+          </FormField>
           <div className="action-row">
-            <button type="button" onClick={onSaveEdit}>
+            <PrimaryButton type="button" onClick={onSaveEdit}>
               Сохранить
-            </button>
-            <button type="button" className="ghost-button" onClick={() => setEditingId(null)}>
+            </PrimaryButton>
+            <SecondaryButton type="button" onClick={() => setEditingId(null)}>
               Отмена
-            </button>
+            </SecondaryButton>
           </div>
-        </div>
+        </GlassCard>
       )}
 
-      {error && <p className="error">{error}</p>}
-      {isLoading && <p className="muted">Загрузка постов...</p>}
-      {!isLoading && posts.length === 0 && <p className="muted">У вас пока нет постов.</p>}
+      <PageState
+        error={error}
+        loading={isLoading ? 'Загрузка постов...' : undefined}
+        empty={!isLoading && posts.length === 0 ? 'У вас пока нет постов.' : null}
+      />
       <div className="stack">
         {posts.map((post) => (
           <PostCard

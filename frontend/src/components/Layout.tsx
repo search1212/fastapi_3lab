@@ -6,6 +6,8 @@ export function Layout() {
 
   return (
     <div className="app-shell">
+      <div className="bg-orb orb-left" />
+      <div className="bg-orb orb-right" />
       <header className="header">
         <div className="container nav">
           <Link to="/" className="brand-button">
@@ -42,7 +44,7 @@ export function Layout() {
               </>
             )}
             {isAuthenticated && (
-              <button type="button" onClick={logout} className="ghost-button">
+              <button type="button" onClick={logout} className="btn btn-secondary">
                 Выйти
               </button>
             )}

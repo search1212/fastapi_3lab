@@ -4,6 +4,10 @@ import type { UserPublic } from '../types/api'
 import { ApiError } from '../api/client'
 import { getMe, updateMe } from '../api/users'
 import { useAuth } from '../auth/AuthContext'
+import { PrimaryButton } from '../components/ui/Buttons'
+import { FormField } from '../components/ui/FormField'
+import { GlassCard } from '../components/ui/GlassCard'
+import { PageState } from '../components/ui/PageState'
 
 export function MyProfilePage() {
   const { accessToken } = useAuth()
@@ -60,31 +64,28 @@ export function MyProfilePage() {
   return (
     <section>
       <h2>Мой профиль</h2>
-      {isLoading && <p className="muted">Загрузка профиля...</p>}
-      {error && <p className="error">{error}</p>}
+      <PageState loading={isLoading ? 'Загрузка профиля...' : undefined} error={error} />
       {!isLoading && profile && (
-        <form className="card form" onSubmit={onSubmit}>
-          <label>
-            Email
+        <GlassCard>
+          <form className="form" onSubmit={onSubmit}>
+            <FormField label="Email">
             <input type="email" value={profile.email} disabled />
-          </label>
-          <label>
-            Имя пользователя
+            </FormField>
+            <FormField label="Имя пользователя">
             <input value={username} onChange={(e) => setUsername(e.target.value)} minLength={3} maxLength={50} />
-          </label>
-          <label>
-            О себе
+            </FormField>
+            <FormField label="О себе">
             <input value={bio} onChange={(e) => setBio(e.target.value)} maxLength={1000} />
-          </label>
-          <label>
-            URL аватарки
+            </FormField>
+            <FormField label="URL аватарки">
             <input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} maxLength={1024} />
-          </label>
-          <button type="submit" disabled={isSaving}>
-            {isSaving ? 'Сохраняем...' : 'Сохранить'}
-          </button>
-          {success && <p className="success">{success}</p>}
-        </form>
+            </FormField>
+            <PrimaryButton type="submit" disabled={isSaving}>
+              {isSaving ? 'Сохраняем...' : 'Сохранить'}
+            </PrimaryButton>
+            {success && <p className="success">{success}</p>}
+          </form>
+        </GlassCard>
       )}
     </section>
   )

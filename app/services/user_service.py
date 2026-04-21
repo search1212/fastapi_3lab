@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,7 +11,7 @@ class UserService:
         self.session = session
         self.user_repo = UserRepository(session)
 
-    async def get_user_or_404(self, user_id: uuid.UUID) -> User:
+    async def get_user_or_404(self, user_id: int) -> User:
         user = await self.user_repo.get_by_id(user_id)
         if user is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

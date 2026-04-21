@@ -70,14 +70,27 @@ export function MyPostsPage() {
     }
   }
 
+  const onCancelEdit = () => {
+    setEditingId(null)
+    setEditingContent('')
+  }
+
   return (
     <section>
       <h2>Мои посты</h2>
       <GlassCard>
         <form className="form" onSubmit={onCreate}>
           <FormField label="Новый пост">
-          <input value={content} onChange={(e) => setContent(e.target.value)} maxLength={5000} />
+            <textarea
+              className="post-editor-input"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              maxLength={5000}
+              rows={4}
+              placeholder="Что нового?"
+            />
           </FormField>
+          <div className="editor-meta">{content.trim().length}/5000</div>
           <PrimaryButton type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Публикуем...' : 'Опубликовать'}
           </PrimaryButton>
@@ -85,15 +98,27 @@ export function MyPostsPage() {
       </GlassCard>
 
       {editingId && (
-        <GlassCard className="form">
-          <FormField label="Редактирование поста">
-            <input value={editingContent} onChange={(e) => setEditingContent(e.target.value)} maxLength={5000} />
+        <GlassCard className="post-edit-panel">
+          <div className="post-edit-head">
+            <strong>Редактирование поста</strong>
+            <span className="muted">Пост #{editingId}</span>
+          </div>
+          <FormField label="Новый текст">
+            <textarea
+              className="post-editor-input"
+              value={editingContent}
+              onChange={(e) => setEditingContent(e.target.value)}
+              maxLength={5000}
+              rows={5}
+              autoFocus
+            />
           </FormField>
-          <div className="action-row">
+          <div className="editor-meta">{editingContent.trim().length}/5000</div>
+          <div className="action-row post-edit-actions">
             <PrimaryButton type="button" onClick={onSaveEdit}>
               Сохранить
             </PrimaryButton>
-            <SecondaryButton type="button" onClick={() => setEditingId(null)}>
+            <SecondaryButton type="button" onClick={onCancelEdit}>
               Отмена
             </SecondaryButton>
           </div>

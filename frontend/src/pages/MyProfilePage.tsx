@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import type { UserPublic } from '../types/api'
 import { ApiError } from '../api/client'
 import { getMe, updateMe } from '../api/users'
 import { useAuth } from '../auth/AuthContext'
-import { PrimaryButton } from '../components/ui/Buttons'
+import { PrimaryButton, SecondaryButton } from '../components/ui/Buttons'
 import { FormField } from '../components/ui/FormField'
 import { GlassCard } from '../components/ui/GlassCard'
 import { PageState } from '../components/ui/PageState'
@@ -17,6 +18,7 @@ export function MyProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -53,6 +55,7 @@ export function MyProfilePage() {
         avatar_url: avatarUrl,
       })
       setProfile(updated)
+      setIsEditing(false)
       setSuccess('Профиль обновлен')
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Не удалось сохранить изменения')
@@ -66,25 +69,60 @@ export function MyProfilePage() {
       <h2>Мой профиль</h2>
       <PageState loading={isLoading ? 'Загрузка профиля...' : undefined} error={error} />
       {!isLoading && profile && (
-        <GlassCard>
-          <form className="form" onSubmit={onSubmit}>
+        <GlassCard className="profile-card">
+          <form className="form profile-form" onSubmit={onSubmit}>
             <FormField label="Email">
-            <input type="email" value={profile.email} disabled />
+              <input type="email" value={profile.email} disabled />
             </FormField>
             <FormField label="Имя пользователя">
-            <input value={username} onChange={(e) => setUsername(e.target.value)} minLength={3} maxLength={50} />
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                minLength={3}
+                maxLength={50}
+                disabled={!isEditing}
+              />
             </FormField>
             <FormField label="О себе">
-            <input value={bio} onChange={(e) => setBio(e.target.value)} maxLength={1000} />
+              <input value={bio} onChange={(e) => setBio(e.target.value)} maxLength={1000} disabled={!isEditing} />
             </FormField>
             <FormField label="URL аватарки">
-            <input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} maxLength={1024} />
+              <input
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                maxLength={1024}
+                disabled={!isEditing}
+              />
             </FormField>
-            <PrimaryButton type="submit" disabled={isSaving}>
-              {isSaving ? 'Сохраняем...' : 'Сохранить'}
-            </PrimaryButton>
+            <div className="action-row">
+              {!isEditing && (
+                <SecondaryButton type="button" onClick={() => setIsEditing(true)}>
+                  Изменить профиль
+                </SecondaryButton>
+              )}
+              {isEditing && (
+                <>
+                  <PrimaryButton type="submit" disabled={isSaving}>
+                    {isSaving ? 'Сохраняем...' : 'Сохранить'}
+                  </PrimaryButton>
+                  <SecondaryButton type="button" onClick={() => setIsEditing(false)}>
+                    Отмена
+                  </SecondaryButton>
+                </>
+              )}
+              <Link to="/my-posts" className="menu-button">
+                Перейти к постам
+              </Link>
+            </div>
             {success && <p className="success">{success}</p>}
           </form>
+          <div className="profile-photo-wrap">
+            {avatarUrl ? (
+              <img className="profile-photo" src={avatarUrl} alt="Аватар профиля" />
+            ) : (
+              <div className="profile-photo-placeholder">Нет фото</div>
+            )}
+          </div>
         </GlassCard>
       )}
     </section>

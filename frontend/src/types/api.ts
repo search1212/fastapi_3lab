@@ -40,6 +40,13 @@ export interface PostRead {
   updated_at: string
 }
 
+export interface PostAuthorPreview {
+  id: number
+  username: string
+  avatar_url: string | null
+  bio: string | null
+}
+
 export interface UserUpdateMe {
   username?: string
   bio?: string
@@ -59,4 +66,12 @@ export type ReactionType = 'like' | 'heart' | 'fire' | 'laugh'
 export interface ReactionRead {
   post_id: number
   reaction_type: ReactionType
+}
+
+export interface ReactionCountRead {
+  post_id: number
+  like: number
+  heart: number
+  fire: number
+  laugh: number
 }

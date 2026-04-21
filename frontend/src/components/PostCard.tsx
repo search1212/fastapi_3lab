@@ -1,17 +1,33 @@
-import type { PostRead, ReactionType } from '../types/api'
-import { PrimaryButton, SecondaryButton } from './ui/Buttons'
+import { Link } from 'react-router-dom'
+import type { PostAuthorPreview, PostRead, ReactionType } from '../types/api'
+import { SecondaryButton } from './ui/Buttons'
 import { GlassCard } from './ui/GlassCard'
 
 interface PostCardProps {
   post: PostRead
+  author?: PostAuthorPreview
+  isOwnAuthor?: boolean
+  isFollowingAuthor?: boolean
+  onToggleFollowAuthor?: (authorId: number, isFollowing: boolean) => void
   editable?: boolean
   onEdit?: (post: PostRead) => void
   reaction?: ReactionType | null
+  reactionCounts?: Partial<Record<ReactionType, number>>
   onReact?: (reaction: ReactionType) => void
-  onRemoveReaction?: () => void
 }
 
-export function PostCard({ post, editable = false, onEdit, reaction = null, onReact, onRemoveReaction }: PostCardProps) {
+export function PostCard({
+  post,
+  author,
+  isOwnAuthor = false,
+  isFollowingAuthor = false,
+  onToggleFollowAuthor,
+  editable = false,
+  onEdit,
+  reaction = null,
+  reactionCounts,
+  onReact,
+}: PostCardProps) {
   const reactionMap: Array<{ value: ReactionType; emoji: string; label: string }> = [
     { value: 'like', emoji: '👍', label: 'Нравится' },
     { value: 'heart', emoji: '❤️', label: 'Любовь' },
@@ -21,9 +37,46 @@ export function PostCard({ post, editable = false, onEdit, reaction = null, onRe
 
   return (
     <GlassCard className="post-card">
+      {author && (
+        <div className="author-chip">
+          <Link to={`/users/${author.id}`} className="author-main">
+            {author.avatar_url ? (
+              <img className="author-avatar" src={author.avatar_url} alt={`Аватар ${author.username}`} />
+            ) : (
+              <span className="author-avatar author-avatar-fallback">{author.username.slice(0, 1).toUpperCase()}</span>
+            )}
+            <span className="author-name">@{author.username}</span>
+          </Link>
+          <div className="author-popover glass-card">
+            <div className="author-popover-head">
+              <div className="author-popover-user">
+                {author.avatar_url ? (
+                  <img className="author-avatar author-avatar-mini" src={author.avatar_url} alt={`Аватар ${author.username}`} />
+                ) : (
+                  <span className="author-avatar author-avatar-fallback author-avatar-mini">
+                    {author.username.slice(0, 1).toUpperCase()}
+                  </span>
+                )}
+                <strong>@{author.username}</strong>
+              </div>
+              {author.bio && <p className="muted">{author.bio}</p>}
+            </div>
+            <div className="action-row">
+              <Link to={`/users/${author.id}`} className="menu-button">
+                Профиль
+              </Link>
+              {!isOwnAuthor && onToggleFollowAuthor && (
+                <SecondaryButton type="button" onClick={() => onToggleFollowAuthor(author.id, isFollowingAuthor)}>
+                  {isFollowingAuthor ? 'Отписаться' : 'Подписаться'}
+                </SecondaryButton>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <p className="content-text">{post.content}</p>
       <div className="meta">
-        <span>Автор: {post.author_id}</span>
+        {!author && <span>Автор: {post.author_id}</span>}
         <span>{new Date(post.created_at).toLocaleString()}</span>
         {post.is_edited && <span>изменен</span>}
       </div>
@@ -44,13 +97,9 @@ export function PostCard({ post, editable = false, onEdit, reaction = null, onRe
                 title={item.label}
               >
                 <span>{item.emoji}</span>
+                <span>{reactionCounts?.[item.value] ?? 0}</span>
               </SecondaryButton>
             ))}
-            {reaction && onRemoveReaction && (
-              <PrimaryButton type="button" className="small" onClick={onRemoveReaction}>
-                убрать
-              </PrimaryButton>
-            )}
           </div>
         )}
       </div>

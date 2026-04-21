@@ -11,3 +11,11 @@ class ReactionRead(BaseModel):
     post_id: int
     reaction_type: ReactionType
 
+
+class ReactionCountRead(BaseModel):
+    post_id: int
+    like: int = 0
+    heart: int = 0
+    fire: int = 0
+    laugh: int = 0
+

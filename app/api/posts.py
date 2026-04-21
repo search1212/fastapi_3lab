@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
 from app.db.models import User
 from app.db.session import get_db_session
 from app.schemas.post import PostCreate, PostRead, PostUpdate
-from app.schemas.reaction import ReactionRead, ReactionUpdate
+from app.db.enums import ReactionType
+from app.schemas.reaction import ReactionCountRead, ReactionRead, ReactionUpdate
 from app.services.post_service import PostService
 from app.services.social_service import SocialService
 
@@ -64,6 +65,27 @@ async def my_reactions(
 ) -> list[ReactionRead]:
     reactions = await SocialService(session).list_user_reactions(current_user)
     return [ReactionRead(post_id=item.post_id, reaction_type=item.reaction_type) for item in reactions]
+
+
+@router.get("/reactions/counts", response_model=list[ReactionCountRead])
+async def reaction_counts(
+    post_ids: list[int] = Query(default=[]),
+    session: AsyncSession = Depends(get_db_session),
+) -> list[ReactionCountRead]:
+    counts = await SocialService(session).get_reaction_counts(post_ids)
+    result: list[ReactionCountRead] = []
+    for post_id in post_ids:
+        per_post = counts.get(post_id, {})
+        result.append(
+            ReactionCountRead(
+                post_id=post_id,
+                like=per_post.get(ReactionType.LIKE, 0),
+                heart=per_post.get(ReactionType.HEART, 0),
+                fire=per_post.get(ReactionType.FIRE, 0),
+                laugh=per_post.get(ReactionType.LAUGH, 0),
+            )
+        )
+    return result
 
 
 @router.put("/{post_id}/reaction", status_code=status.HTTP_204_NO_CONTENT)

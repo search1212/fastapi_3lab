@@ -1,5 +1,5 @@
 import { apiRequest } from './client'
-import type { PostCreateRequest, PostRead, PostUpdateRequest, ReactionRead, ReactionType } from '../types/api'
+import type { PostCreateRequest, PostRead, PostUpdateRequest, ReactionCountRead, ReactionRead, ReactionType } from '../types/api'
 
 export async function getGlobalFeed(): Promise<PostRead[]> {
   return apiRequest<PostRead[]>('/posts/feed/global', { method: 'GET' })
@@ -48,5 +48,13 @@ export async function getMyReactions(token: string): Promise<ReactionRead[]> {
   return apiRequest<ReactionRead[]>('/posts/reactions/me', {
     method: 'GET',
     token,
+  })
+}
+
+export async function getReactionCounts(postIds: number[]): Promise<ReactionCountRead[]> {
+  if (postIds.length === 0) return []
+  const query = postIds.map((id) => `post_ids=${id}`).join('&')
+  return apiRequest<ReactionCountRead[]>(`/posts/reactions/counts?${query}`, {
+    method: 'GET',
   })
 }

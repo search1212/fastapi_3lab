@@ -48,3 +48,6 @@ class SocialService:
     async def list_user_reactions(self, current_user: User) -> list[Reaction]:
         return await self.social_repo.list_user_reactions(current_user.id)
 
+    async def get_reaction_counts(self, post_ids: list[int]) -> dict[int, dict[ReactionType, int]]:
+        return await self.social_repo.get_reaction_counts(post_ids)
+

@@ -1,4 +1,4 @@
-from sqlalchemy import and_, delete, select
+from sqlalchemy import and_, delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.enums import ReactionType
@@ -71,4 +71,19 @@ class SocialRepository:
     async def list_user_reactions(self, user_id: int) -> list[Reaction]:
         result = await self.session.execute(select(Reaction).where(Reaction.user_id == user_id))
         return list(result.scalars().all())
+
+    async def get_reaction_counts(self, post_ids: list[int]) -> dict[int, dict[ReactionType, int]]:
+        if not post_ids:
+            return {}
+        result = await self.session.execute(
+            select(Reaction.post_id, Reaction.reaction_type, func.count())
+            .where(Reaction.post_id.in_(post_ids))
+            .group_by(Reaction.post_id, Reaction.reaction_type)
+        )
+        rows = result.all()
+        counts: dict[int, dict[ReactionType, int]] = {}
+        for post_id, reaction_type, count in rows:
+            bucket = counts.setdefault(post_id, {})
+            bucket[reaction_type] = int(count)
+        return counts
 

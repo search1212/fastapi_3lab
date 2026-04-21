@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 
 export function Layout() {
@@ -8,14 +8,22 @@ export function Layout() {
     <div className="app-shell">
       <header className="header">
         <div className="container nav">
-          <h1 className="brand">FastAPI 3Lab</h1>
+          <Link to="/" className="brand-button">
+            <h1 className="brand">Wgram</h1>
+          </Link>
           <nav className="menu">
-            <Link to="/">Feed</Link>
-            <Link to="/register">Register</Link>
-            <Link to="/login">Login</Link>
+            <NavLink to="/" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
+              Лента
+            </NavLink>
+            <NavLink to="/register" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
+              Регистрация
+            </NavLink>
+            <NavLink to="/login" className={({ isActive }) => `menu-button ${isActive ? 'is-active' : ''}`}>
+              Вход
+            </NavLink>
             {isAuthenticated && (
               <button type="button" onClick={logout} className="ghost-button">
-                Logout
+                Выйти
               </button>
             )}
           </nav>

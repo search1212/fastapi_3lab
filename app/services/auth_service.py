@@ -39,6 +39,12 @@ class AuthService:
         await self.session.commit()
         return user
 
+    async def is_email_available(self, email: str) -> bool:
+        return await self.user_repo.get_by_email(email) is None
+
+    async def is_username_available(self, username: str) -> bool:
+        return await self.user_repo.get_by_username(username) is None
+
     async def login(
         self,
         payload: LoginRequest,

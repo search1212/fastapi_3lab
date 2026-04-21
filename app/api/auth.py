@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db_session
-from app.schemas.auth import AuthResponse, LoginRequest, RefreshRequest, RegisterRequest
+from app.schemas.auth import AvailabilityResponse, AuthResponse, LoginRequest, RefreshRequest, RegisterRequest
 from app.schemas.user import UserPublic
 from app.services.auth_service import AuthService
 
@@ -46,4 +46,22 @@ async def refresh(
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(payload: RefreshRequest, session: AsyncSession = Depends(get_db_session)) -> None:
     await AuthService(session).logout(payload.refresh_token)
+
+
+@router.get("/check-email", response_model=AvailabilityResponse)
+async def check_email(
+    email: str = Query(min_length=3, max_length=320),
+    session: AsyncSession = Depends(get_db_session),
+) -> AvailabilityResponse:
+    available = await AuthService(session).is_email_available(email)
+    return AvailabilityResponse(field="email", value=email, available=available)
+
+
+@router.get("/check-username", response_model=AvailabilityResponse)
+async def check_username(
+    username: str = Query(min_length=3, max_length=50),
+    session: AsyncSession = Depends(get_db_session),
+) -> AvailabilityResponse:
+    available = await AuthService(session).is_username_available(username)
+    return AvailabilityResponse(field="username", value=username, available=available)
 

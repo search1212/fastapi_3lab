@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { loginUser } from '../api/auth'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
@@ -26,7 +26,7 @@ export function LoginPage() {
       if (err instanceof ApiError) {
         setError(err.message)
       } else {
-        setError('Unexpected error during login')
+        setError('Не удалось выполнить вход.')
       }
     } finally {
       setIsLoading(false)
@@ -34,21 +34,24 @@ export function LoginPage() {
   }
 
   return (
-    <section>
-      <h2>Login</h2>
+    <section className="auth-page">
+      <h2>Вход</h2>
       <form className="card form" onSubmit={onSubmit}>
         <label>
           Email
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
         <label>
-          Password
+          Пароль
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </label>
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Signing in...' : 'Sign in'}
+          {isLoading ? 'Входим...' : 'Войти'}
         </button>
         {error && <p className="error">{error}</p>}
+        <p className="muted">
+          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+        </p>
       </form>
     </section>
   )

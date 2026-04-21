@@ -31,10 +31,10 @@ export function GlobalFeedPage() {
 
   return (
     <section>
-      <h2>Global feed</h2>
-      {isLoading && <p className="muted">Loading posts...</p>}
+      <h2>Общая лента</h2>
+      {isLoading && <p className="muted">Загружаем посты...</p>}
       {error && <p className="error">{error}</p>}
-      {!isLoading && !error && posts.length === 0 && <p className="muted">No posts yet.</p>}
+      {!isLoading && !error && posts.length === 0 && <p className="muted">Постов пока нет.</p>}
       <div className="stack">
         {posts.map((post) => (
           <PostCard key={post.id} post={post} />

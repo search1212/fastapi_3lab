@@ -15,6 +15,12 @@ export interface AuthResponse {
   token_type: string
 }
 
+export interface AvailabilityResponse {
+  field: 'email' | 'username'
+  value: string
+  available: boolean
+}
+
 export interface UserPublic {
   id: string
   email: string

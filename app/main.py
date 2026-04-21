@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 
 # Supports direct script run: `python app/main.py`
 if __package__ in {None, ""}:
@@ -27,6 +28,21 @@ app = FastAPI(title=settings.app_name, debug=settings.debug, lifespan=lifespan)
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(posts_router)
+
+
+@app.get("/", response_class=HTMLResponse, tags=["system"])
+async def home() -> str:
+    return """
+    <html>
+      <head><title>FastAPI 3Lab</title></head>
+      <body>
+        <h1>FastAPI 3Lab</h1>
+        <p>API is running.</p>
+        <p>Health check: <a href="/health">/health</a></p>
+        <p>Swagger: <a href="/docs">/docs</a></p>
+      </body>
+    </html>
+    """
 
 
 @app.get("/health", tags=["system"])

@@ -8,6 +8,19 @@ import { PrimaryButton } from '../components/ui/Buttons'
 import { FormField } from '../components/ui/FormField'
 import { GlassCard } from '../components/ui/GlassCard'
 import { PageState } from '../components/ui/PageState'
+import { PasswordField } from '../components/ui/PasswordField'
+
+function mapLoginError(message: string): string {
+  const normalized = message.toLowerCase()
+  if (
+    normalized.includes('invalid credentials') ||
+    normalized.includes('unauthorized') ||
+    normalized.includes('неверн')
+  ) {
+    return 'Неверный логин или пароль'
+  }
+  return message
+}
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -27,7 +40,11 @@ export function LoginPage() {
       login(tokens)
       navigate('/')
     } catch (failure) {
-      setErrorText(failure instanceof ApiError ? failure.message : 'Не удалось выполнить вход.')
+      if (failure instanceof ApiError) {
+        setErrorText(mapLoginError(failure.message))
+      } else {
+        setErrorText('Не удалось выполнить вход.')
+      }
     } finally {
       setPending(false)
     }
@@ -44,16 +61,16 @@ export function LoginPage() {
               value={emailValue}
               onChange={(event) => setEmailValue(event.target.value)}
               required
+              autoComplete="email"
             />
           </FormField>
-          <FormField label="Пароль">
-            <input
-              type="password"
-              value={passwordValue}
-              onChange={(event) => setPasswordValue(event.target.value)}
-              required
-            />
-          </FormField>
+          <PasswordField
+            label="Пароль"
+            value={passwordValue}
+            onChange={(event) => setPasswordValue(event.target.value)}
+            required
+            autoComplete="current-password"
+          />
           <PrimaryButton type="submit" disabled={pending}>
             {pending ? 'Входим...' : 'Войти'}
           </PrimaryButton>

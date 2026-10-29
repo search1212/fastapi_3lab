@@ -54,7 +54,10 @@ class AuthService:
     ) -> AuthResponse:
         account = await self._users.get_by_email(payload.email)
         if account is None or not verify_password(payload.password, account.password_hash):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Неверный логин или пароль",
+            )
 
         tokens = await self._create_token_pair(account.id, user_agent=user_agent, ip_address=ip_address)
         await self._db.commit()

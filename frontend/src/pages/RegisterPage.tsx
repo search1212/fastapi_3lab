@@ -7,6 +7,7 @@ import { PrimaryButton } from '../components/ui/Buttons'
 import { FormField } from '../components/ui/FormField'
 import { GlassCard } from '../components/ui/GlassCard'
 import { PageState } from '../components/ui/PageState'
+import { PasswordField } from '../components/ui/PasswordField'
 
 type FieldStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
 
@@ -87,7 +88,7 @@ export function RegisterPage() {
       emailStatus === 'invalid' ||
       usernameStatus === 'invalid'
     ) {
-      setErrorText('Проверьте email и username: есть ошибки валидации.')
+      setErrorText('Проверьте email и имя пользователя: есть ошибки валидации.')
       return
     }
 
@@ -125,6 +126,7 @@ export function RegisterPage() {
               value={emailValue}
               onChange={(event) => setEmailValue(event.target.value)}
               required
+              autoComplete="email"
             />
           </FormField>
           <FormField
@@ -144,18 +146,18 @@ export function RegisterPage() {
               minLength={3}
               maxLength={50}
               required
+              autoComplete="username"
             />
           </FormField>
-          <FormField label="Пароль">
-            <input
-              type="password"
-              value={passwordValue}
-              onChange={(event) => setPasswordValue(event.target.value)}
-              minLength={8}
-              maxLength={128}
-              required
-            />
-          </FormField>
+          <PasswordField
+            label="Пароль"
+            value={passwordValue}
+            onChange={(event) => setPasswordValue(event.target.value)}
+            minLength={8}
+            maxLength={128}
+            required
+            autoComplete="new-password"
+          />
           <PrimaryButton type="submit" disabled={pending}>
             {pending ? 'Создаем аккаунт...' : 'Создать аккаунт'}
           </PrimaryButton>

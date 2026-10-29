@@ -36,6 +36,7 @@ export function PostCard({
   onReact,
 }: PostCardProps) {
   const initial = author ? author.username.slice(0, 1).toUpperCase() : ''
+  const canReact = Boolean(onReact) && !isOwnAuthor
 
   return (
     <GlassCard className="post-card">
@@ -90,19 +91,34 @@ export function PostCard({
             Редактировать
           </SecondaryButton>
         )}
-        {onReact && (
+        {canReact && (
           <div className="reaction-row">
             {REACTION_OPTIONS.map((option) => (
               <SecondaryButton
                 type="button"
                 key={option.value}
                 className={`small emoji-pill ${reaction === option.value ? 'active-reaction' : ''}`}
-                onClick={() => onReact(option.value)}
+                onClick={() => onReact?.(option.value)}
                 title={option.label}
               >
                 <span>{option.emoji}</span>
                 <span>{reactionCounts?.[option.value] ?? 0}</span>
               </SecondaryButton>
+            ))}
+          </div>
+        )}
+        {onReact && isOwnAuthor && (
+          <p className="reaction-locked" title="Нельзя ставить реакции на собственные посты">
+            Реакции на свои посты недоступны
+          </p>
+        )}
+        {!onReact && isOwnAuthor && reactionCounts && (
+          <div className="reaction-row">
+            {REACTION_OPTIONS.map((option) => (
+              <span key={option.value} className="small emoji-pill" title={option.label}>
+                <span>{option.emoji}</span>
+                <span>{reactionCounts[option.value] ?? 0}</span>
+              </span>
             ))}
           </div>
         )}

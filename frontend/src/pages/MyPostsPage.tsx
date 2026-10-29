@@ -2,17 +2,19 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ApiError } from '../api/client'
 import { createPost, getMyPosts, updatePost } from '../api/posts'
+import { getMe } from '../api/users'
 import { useAuth } from '../auth/AuthContext'
 import { PostCard } from '../components/PostCard'
 import { PrimaryButton, SecondaryButton } from '../components/ui/Buttons'
 import { FormField } from '../components/ui/FormField'
 import { GlassCard } from '../components/ui/GlassCard'
 import { PageState } from '../components/ui/PageState'
-import type { PostRead } from '../types/api'
+import type { PostAuthorPreview, PostRead } from '../types/api'
 
 export function MyPostsPage() {
   const { accessToken } = useAuth()
   const [items, setItems] = useState<PostRead[]>([])
+  const [mePreview, setMePreview] = useState<PostAuthorPreview | null>(null)
   const [draftText, setDraftText] = useState('')
   const [editTargetId, setEditTargetId] = useState<number | null>(null)
   const [editDraft, setEditDraft] = useState('')
@@ -25,7 +27,14 @@ export function MyPostsPage() {
     setLoading(true)
     setErrorText(null)
     try {
-      setItems(await getMyPosts(accessToken))
+      const [posts, profile] = await Promise.all([getMyPosts(accessToken), getMe(accessToken)])
+      setItems(posts)
+      setMePreview({
+        id: profile.id,
+        username: profile.username,
+        avatar_url: profile.avatar_url,
+        bio: profile.bio,
+      })
     } catch (failure) {
       setErrorText(failure instanceof ApiError ? failure.message : 'Не удалось загрузить посты')
     } finally {
@@ -135,6 +144,8 @@ export function MyPostsPage() {
           <PostCard
             key={entry.id}
             post={entry}
+            author={mePreview ?? undefined}
+            isOwnAuthor
             editable
             onEdit={(picked) => {
               setEditTargetId(picked.id)

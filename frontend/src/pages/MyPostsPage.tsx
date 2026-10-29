@@ -12,112 +12,113 @@ import type { PostRead } from '../types/api'
 
 export function MyPostsPage() {
   const { accessToken } = useAuth()
-  const [posts, setPosts] = useState<PostRead[]>([])
-  const [content, setContent] = useState('')
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [editingContent, setEditingContent] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [items, setItems] = useState<PostRead[]>([])
+  const [draftText, setDraftText] = useState('')
+  const [editTargetId, setEditTargetId] = useState<number | null>(null)
+  const [editDraft, setEditDraft] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [errorText, setErrorText] = useState<string | null>(null)
 
-  const load = async () => {
+  const fetchPosts = async () => {
     if (!accessToken) return
-    setIsLoading(true)
-    setError(null)
+    setLoading(true)
+    setErrorText(null)
     try {
-      setPosts(await getMyPosts(accessToken))
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Не удалось загрузить посты')
+      setItems(await getMyPosts(accessToken))
+    } catch (failure) {
+      setErrorText(failure instanceof ApiError ? failure.message : 'Не удалось загрузить посты')
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    load()
+    fetchPosts()
   }, [accessToken])
 
-  const onCreate = async (event: FormEvent<HTMLFormElement>) => {
+  const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!accessToken) return
-    if (content.trim().length === 0) {
-      setError('Текст поста не должен быть пустым')
+    if (draftText.trim().length === 0) {
+      setErrorText('Текст поста не должен быть пустым')
       return
     }
-    setIsSubmitting(true)
-    setError(null)
+
+    setSaving(true)
+    setErrorText(null)
     try {
-      const post = await createPost({ content }, accessToken)
-      setPosts((prev) => [post, ...prev])
-      setContent('')
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Не удалось создать пост')
+      const created = await createPost({ content: draftText }, accessToken)
+      setItems((previous) => [created, ...previous])
+      setDraftText('')
+    } catch (failure) {
+      setErrorText(failure instanceof ApiError ? failure.message : 'Не удалось создать пост')
     } finally {
-      setIsSubmitting(false)
+      setSaving(false)
     }
   }
 
-  const onSaveEdit = async () => {
-    if (!accessToken || !editingId) return
-    setError(null)
+  const handleSaveEdit = async () => {
+    if (!accessToken || !editTargetId) return
+    setErrorText(null)
     try {
-      const updated = await updatePost(editingId, { content: editingContent }, accessToken)
-      setPosts((prev) => prev.map((post) => (post.id === updated.id ? updated : post)))
-      setEditingId(null)
-      setEditingContent('')
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Не удалось сохранить пост')
+      const updated = await updatePost(editTargetId, { content: editDraft }, accessToken)
+      setItems((previous) => previous.map((entry) => (entry.id === updated.id ? updated : entry)))
+      setEditTargetId(null)
+      setEditDraft('')
+    } catch (failure) {
+      setErrorText(failure instanceof ApiError ? failure.message : 'Не удалось сохранить пост')
     }
   }
 
-  const onCancelEdit = () => {
-    setEditingId(null)
-    setEditingContent('')
+  const handleCancelEdit = () => {
+    setEditTargetId(null)
+    setEditDraft('')
   }
 
   return (
     <section>
       <GlassCard>
-        <form className="form" onSubmit={onCreate}>
+        <form className="form" onSubmit={handleCreate}>
           <FormField label="Новый пост">
             <textarea
               className="post-editor-input"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+              value={draftText}
+              onChange={(event) => setDraftText(event.target.value)}
               maxLength={5000}
               rows={4}
               placeholder="Что нового?"
             />
           </FormField>
-          <div className="editor-meta">{content.trim().length}/5000</div>
-          <PrimaryButton type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Публикуем...' : 'Опубликовать'}
+          <div className="editor-meta">{draftText.trim().length}/5000</div>
+          <PrimaryButton type="submit" disabled={saving}>
+            {saving ? 'Публикуем...' : 'Опубликовать'}
           </PrimaryButton>
         </form>
       </GlassCard>
 
-      {editingId && (
+      {editTargetId && (
         <GlassCard className="post-edit-panel">
           <div className="post-edit-head">
             <strong>Редактирование поста</strong>
-            <span className="muted">Пост #{editingId}</span>
+            <span className="muted">Пост #{editTargetId}</span>
           </div>
           <FormField label="Новый текст">
             <textarea
               className="post-editor-input"
-              value={editingContent}
-              onChange={(e) => setEditingContent(e.target.value)}
+              value={editDraft}
+              onChange={(event) => setEditDraft(event.target.value)}
               maxLength={5000}
               rows={5}
               autoFocus
             />
           </FormField>
-          <div className="editor-meta">{editingContent.trim().length}/5000</div>
+          <div className="editor-meta">{editDraft.trim().length}/5000</div>
           <div className="action-row post-edit-actions">
-            <PrimaryButton type="button" onClick={onSaveEdit}>
+            <PrimaryButton type="button" onClick={handleSaveEdit}>
               Сохранить
             </PrimaryButton>
-            <SecondaryButton type="button" onClick={onCancelEdit}>
+            <SecondaryButton type="button" onClick={handleCancelEdit}>
               Отмена
             </SecondaryButton>
           </div>
@@ -125,19 +126,19 @@ export function MyPostsPage() {
       )}
 
       <PageState
-        error={error}
-        loading={isLoading ? 'Загрузка постов...' : undefined}
-        empty={!isLoading && posts.length === 0 ? 'У вас пока нет постов.' : null}
+        error={errorText}
+        loading={loading ? 'Загрузка постов...' : undefined}
+        empty={!loading && items.length === 0 ? 'У вас пока нет постов.' : null}
       />
       <div className="stack">
-        {posts.map((post) => (
+        {items.map((entry) => (
           <PostCard
-            key={post.id}
-            post={post}
+            key={entry.id}
+            post={entry}
             editable
             onEdit={(picked) => {
-              setEditingId(picked.id)
-              setEditingContent(picked.content)
+              setEditTargetId(picked.id)
+              setEditDraft(picked.content)
             }}
           />
         ))}

@@ -22,8 +22,8 @@ async def update_me(
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> UserPublic:
-    user = await UserService(session).update_me(current_user, payload)
-    return UserPublic.model_validate(user)
+    account = await UserService(session).update_me(current_user, payload)
+    return UserPublic.model_validate(account)
 
 
 @router.get("/search", response_model=list[UserPublic])
@@ -31,14 +31,14 @@ async def search_users(
     q: str = Query(min_length=1, max_length=100),
     session: AsyncSession = Depends(get_db_session),
 ) -> list[UserPublic]:
-    users = await UserService(session).search_users(q)
-    return [UserPublic.model_validate(user) for user in users]
+    found = await UserService(session).search_users(q)
+    return [UserPublic.model_validate(account) for account in found]
 
 
 @router.get("/{user_id}", response_model=UserPublic)
 async def get_user_profile(user_id: int, session: AsyncSession = Depends(get_db_session)) -> UserPublic:
-    user = await UserService(session).get_user_or_404(user_id)
-    return UserPublic.model_validate(user)
+    account = await UserService(session).get_user_or_404(user_id)
+    return UserPublic.model_validate(account)
 
 
 @router.post("/{user_id}/follow", status_code=status.HTTP_204_NO_CONTENT)
@@ -61,12 +61,11 @@ async def unfollow_user(
 
 @router.get("/{user_id}/followers", response_model=list[UserPublic])
 async def followers(user_id: int, session: AsyncSession = Depends(get_db_session)) -> list[UserPublic]:
-    users = await SocialService(session).list_followers(user_id)
-    return [UserPublic.model_validate(user) for user in users]
+    found = await SocialService(session).list_followers(user_id)
+    return [UserPublic.model_validate(account) for account in found]
 
 
 @router.get("/{user_id}/following", response_model=list[UserPublic])
 async def following(user_id: int, session: AsyncSession = Depends(get_db_session)) -> list[UserPublic]:
-    users = await SocialService(session).list_following(user_id)
-    return [UserPublic.model_validate(user) for user in users]
-
+    found = await SocialService(session).list_following(user_id)
+    return [UserPublic.model_validate(account) for account in found]

@@ -9,9 +9,9 @@ export function PageState({
 }) {
   return (
     <>
-      {loading && <p className="state state-loading">{loading}</p>}
-      {error && <p className="state state-error">{error}</p>}
-      {empty && <p className="state state-empty">{empty}</p>}
+      {loading ? <p className="state state-loading">{loading}</p> : null}
+      {error ? <p className="state state-error">{error}</p> : null}
+      {empty ? <p className="state state-empty">{empty}</p> : null}
     </>
   )
 }

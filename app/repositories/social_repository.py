@@ -7,83 +7,84 @@ from app.db.models import Reaction, Subscription, User
 
 class SocialRepository:
     def __init__(self, session: AsyncSession) -> None:
-        self.session = session
+        self._db = session
 
     async def follow(self, follower_id: int, followed_id: int) -> Subscription:
-        existing = await self.session.execute(
+        existing = await self._db.execute(
             select(Subscription).where(
                 Subscription.follower_id == follower_id,
                 Subscription.followed_id == followed_id,
             )
         )
-        row = existing.scalar_one_or_none()
-        if row:
-            return row
-        follow = Subscription(follower_id=follower_id, followed_id=followed_id)
-        self.session.add(follow)
-        await self.session.flush()
-        return follow
+        found = existing.scalar_one_or_none()
+        if found:
+            return found
+
+        link = Subscription(follower_id=follower_id, followed_id=followed_id)
+        self._db.add(link)
+        await self._db.flush()
+        return link
 
     async def unfollow(self, follower_id: int, followed_id: int) -> None:
-        await self.session.execute(
+        await self._db.execute(
             delete(Subscription).where(
                 Subscription.follower_id == follower_id,
                 Subscription.followed_id == followed_id,
             )
         )
-        await self.session.flush()
+        await self._db.flush()
 
     async def list_followers(self, user_id: int, limit: int = 50) -> list[User]:
-        result = await self.session.execute(
+        rows = await self._db.execute(
             select(User)
             .join(Subscription, Subscription.follower_id == User.id)
             .where(Subscription.followed_id == user_id)
             .limit(limit)
         )
-        return list(result.scalars().all())
+        return list(rows.scalars().all())
 
     async def list_following(self, user_id: int, limit: int = 50) -> list[User]:
-        result = await self.session.execute(
+        rows = await self._db.execute(
             select(User)
             .join(Subscription, Subscription.followed_id == User.id)
             .where(Subscription.follower_id == user_id)
             .limit(limit)
         )
-        return list(result.scalars().all())
+        return list(rows.scalars().all())
 
     async def set_reaction(self, user_id: int, post_id: int, reaction_type: ReactionType) -> Reaction:
-        result = await self.session.execute(
+        rows = await self._db.execute(
             select(Reaction).where(and_(Reaction.user_id == user_id, Reaction.post_id == post_id))
         )
-        reaction = result.scalar_one_or_none()
-        if reaction is None:
-            reaction = Reaction(user_id=user_id, post_id=post_id, reaction_type=reaction_type)
-            self.session.add(reaction)
+        current = rows.scalar_one_or_none()
+        if current is None:
+            current = Reaction(user_id=user_id, post_id=post_id, reaction_type=reaction_type)
+            self._db.add(current)
         else:
-            reaction.reaction_type = reaction_type
-        await self.session.flush()
-        return reaction
+            current.reaction_type = reaction_type
+        await self._db.flush()
+        return current
 
     async def remove_reaction(self, user_id: int, post_id: int) -> None:
-        await self.session.execute(delete(Reaction).where(Reaction.user_id == user_id, Reaction.post_id == post_id))
-        await self.session.flush()
+        await self._db.execute(delete(Reaction).where(Reaction.user_id == user_id, Reaction.post_id == post_id))
+        await self._db.flush()
 
     async def list_user_reactions(self, user_id: int) -> list[Reaction]:
-        result = await self.session.execute(select(Reaction).where(Reaction.user_id == user_id))
-        return list(result.scalars().all())
+        rows = await self._db.execute(select(Reaction).where(Reaction.user_id == user_id))
+        return list(rows.scalars().all())
 
     async def get_reaction_counts(self, post_ids: list[int]) -> dict[int, dict[ReactionType, int]]:
         if not post_ids:
             return {}
-        result = await self.session.execute(
+
+        rows = await self._db.execute(
             select(Reaction.post_id, Reaction.reaction_type, func.count())
             .where(Reaction.post_id.in_(post_ids))
             .group_by(Reaction.post_id, Reaction.reaction_type)
         )
-        rows = result.all()
-        counts: dict[int, dict[ReactionType, int]] = {}
-        for post_id, reaction_type, count in rows:
-            bucket = counts.setdefault(post_id, {})
-            bucket[reaction_type] = int(count)
-        return counts
 
+        totals: dict[int, dict[ReactionType, int]] = {}
+        for post_id, reaction_type, amount in rows.all():
+            bucket = totals.setdefault(post_id, {})
+            bucket[reaction_type] = int(amount)
+        return totals

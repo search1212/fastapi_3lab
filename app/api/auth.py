@@ -11,8 +11,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
 async def register(payload: RegisterRequest, session: AsyncSession = Depends(get_db_session)) -> UserPublic:
-    user = await AuthService(session).register(payload)
-    return UserPublic.model_validate(user)
+    account = await AuthService(session).register(payload)
+    return UserPublic.model_validate(account)
 
 
 @router.post("/login", response_model=AuthResponse)
@@ -21,12 +21,12 @@ async def login(
     request: Request,
     session: AsyncSession = Depends(get_db_session),
 ) -> AuthResponse:
-    auth = await AuthService(session).login(
+    client_host = request.client.host if request.client else None
+    return await AuthService(session).login(
         payload,
         user_agent=request.headers.get("user-agent"),
-        ip_address=request.client.host if request.client else None,
+        ip_address=client_host,
     )
-    return auth
 
 
 @router.post("/refresh", response_model=AuthResponse)
@@ -35,12 +35,12 @@ async def refresh(
     request: Request,
     session: AsyncSession = Depends(get_db_session),
 ) -> AuthResponse:
-    auth = await AuthService(session).refresh(
+    client_host = request.client.host if request.client else None
+    return await AuthService(session).refresh(
         payload.refresh_token,
         user_agent=request.headers.get("user-agent"),
-        ip_address=request.client.host if request.client else None,
+        ip_address=client_host,
     )
-    return auth
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
@@ -53,8 +53,8 @@ async def check_email(
     email: str = Query(min_length=3, max_length=320),
     session: AsyncSession = Depends(get_db_session),
 ) -> AvailabilityResponse:
-    available = await AuthService(session).is_email_available(email)
-    return AvailabilityResponse(field="email", value=email, available=available)
+    free = await AuthService(session).is_email_available(email)
+    return AvailabilityResponse(field="email", value=email, available=free)
 
 
 @router.get("/check-username", response_model=AvailabilityResponse)
@@ -62,6 +62,5 @@ async def check_username(
     username: str = Query(min_length=3, max_length=50),
     session: AsyncSession = Depends(get_db_session),
 ) -> AvailabilityResponse:
-    available = await AuthService(session).is_username_available(username)
-    return AvailabilityResponse(field="username", value=username, available=available)
-
+    free = await AuthService(session).is_username_available(username)
+    return AvailabilityResponse(field="username", value=username, available=free)

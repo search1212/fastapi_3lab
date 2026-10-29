@@ -3,6 +3,13 @@ import type { PostAuthorPreview, PostRead, ReactionType } from '../types/api'
 import { SecondaryButton } from './ui/Buttons'
 import { GlassCard } from './ui/GlassCard'
 
+const REACTION_OPTIONS: Array<{ value: ReactionType; emoji: string; label: string }> = [
+  { value: 'like', emoji: '👍', label: 'Нравится' },
+  { value: 'heart', emoji: '❤️', label: 'Любовь' },
+  { value: 'fire', emoji: '🔥', label: 'Огонь' },
+  { value: 'laugh', emoji: '😂', label: 'Смешно' },
+]
+
 interface PostCardProps {
   post: PostRead
   author?: PostAuthorPreview
@@ -28,12 +35,7 @@ export function PostCard({
   reactionCounts,
   onReact,
 }: PostCardProps) {
-  const reactionMap: Array<{ value: ReactionType; emoji: string; label: string }> = [
-    { value: 'like', emoji: '👍', label: 'Нравится' },
-    { value: 'heart', emoji: '❤️', label: 'Любовь' },
-    { value: 'fire', emoji: '🔥', label: 'Огонь' },
-    { value: 'laugh', emoji: '😂', label: 'Смешно' },
-  ]
+  const initial = author ? author.username.slice(0, 1).toUpperCase() : ''
 
   return (
     <GlassCard className="post-card">
@@ -43,7 +45,7 @@ export function PostCard({
             {author.avatar_url ? (
               <img className="author-avatar" src={author.avatar_url} alt={`Аватар ${author.username}`} />
             ) : (
-              <span className="author-avatar author-avatar-fallback">{author.username.slice(0, 1).toUpperCase()}</span>
+              <span className="author-avatar author-avatar-fallback">{initial}</span>
             )}
             <span className="author-name">@{author.username}</span>
           </Link>
@@ -51,11 +53,13 @@ export function PostCard({
             <div className="author-popover-head">
               <div className="author-popover-user">
                 {author.avatar_url ? (
-                  <img className="author-avatar author-avatar-mini" src={author.avatar_url} alt={`Аватар ${author.username}`} />
+                  <img
+                    className="author-avatar author-avatar-mini"
+                    src={author.avatar_url}
+                    alt={`Аватар ${author.username}`}
+                  />
                 ) : (
-                  <span className="author-avatar author-avatar-fallback author-avatar-mini">
-                    {author.username.slice(0, 1).toUpperCase()}
-                  </span>
+                  <span className="author-avatar author-avatar-fallback author-avatar-mini">{initial}</span>
                 )}
                 <strong>@{author.username}</strong>
               </div>
@@ -88,16 +92,16 @@ export function PostCard({
         )}
         {onReact && (
           <div className="reaction-row">
-            {reactionMap.map((item) => (
+            {REACTION_OPTIONS.map((option) => (
               <SecondaryButton
                 type="button"
-                key={item.value}
-                className={`small emoji-pill ${reaction === item.value ? 'active-reaction' : ''}`}
-                onClick={() => onReact(item.value)}
-                title={item.label}
+                key={option.value}
+                className={`small emoji-pill ${reaction === option.value ? 'active-reaction' : ''}`}
+                onClick={() => onReact(option.value)}
+                title={option.label}
               >
-                <span>{item.emoji}</span>
-                <span>{reactionCounts?.[item.value] ?? 0}</span>
+                <span>{option.emoji}</span>
+                <span>{reactionCounts?.[option.value] ?? 0}</span>
               </SecondaryButton>
             ))}
           </div>

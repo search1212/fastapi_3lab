@@ -19,4 +19,3 @@ class UserUpdateMe(BaseModel):
     username: str | None = Field(default=None, min_length=3, max_length=50)
     bio: str | None = Field(default=None, max_length=1000)
     avatar_url: str | None = Field(default=None, max_length=1024)
-

@@ -20,4 +20,3 @@ class PostRead(BaseModel):
     is_edited: bool
     created_at: datetime
     updated_at: datetime
-

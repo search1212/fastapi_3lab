@@ -18,4 +18,3 @@ class ReactionCountRead(BaseModel):
     heart: int = 0
     fire: int = 0
     laugh: int = 0
-

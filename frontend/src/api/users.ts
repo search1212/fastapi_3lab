@@ -14,8 +14,8 @@ export async function updateMe(token: string, payload: UserUpdateMe): Promise<Us
 }
 
 export async function searchUsers(query: string, token: string): Promise<UserPublic[]> {
-  const q = new URLSearchParams({ q: query }).toString()
-  return apiRequest<UserPublic[]>(`/users/search?${q}`, { method: 'GET', token })
+  const params = new URLSearchParams({ q: query }).toString()
+  return apiRequest<UserPublic[]>(`/users/search?${params}`, { method: 'GET', token })
 }
 
 export async function getUserById(userId: number, token: string): Promise<UserPublic> {

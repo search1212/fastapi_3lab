@@ -4,36 +4,32 @@ import { Link, useNavigate } from 'react-router-dom'
 import { loginUser } from '../api/auth'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
-import { GlassCard } from '../components/ui/GlassCard'
-import { FormField } from '../components/ui/FormField'
 import { PrimaryButton } from '../components/ui/Buttons'
+import { FormField } from '../components/ui/FormField'
+import { GlassCard } from '../components/ui/GlassCard'
 import { PageState } from '../components/ui/PageState'
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const auth = useAuth()
+  const { login } = useAuth()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [emailValue, setEmailValue] = useState('')
+  const [passwordValue, setPasswordValue] = useState('')
+  const [pending, setPending] = useState(false)
+  const [errorText, setErrorText] = useState<string | null>(null)
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setIsLoading(true)
-    setError(null)
+    setPending(true)
+    setErrorText(null)
     try {
-      const tokens = await loginUser({ email, password })
-      auth.login(tokens)
+      const tokens = await loginUser({ email: emailValue, password: passwordValue })
+      login(tokens)
       navigate('/')
-    } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message)
-      } else {
-        setError('Не удалось выполнить вход.')
-      }
+    } catch (failure) {
+      setErrorText(failure instanceof ApiError ? failure.message : 'Не удалось выполнить вход.')
     } finally {
-      setIsLoading(false)
+      setPending(false)
     }
   }
 
@@ -41,17 +37,27 @@ export function LoginPage() {
     <section className="auth-page">
       <h2>Вход</h2>
       <GlassCard>
-        <form className="form" onSubmit={onSubmit}>
+        <form className="form" onSubmit={handleSubmit}>
           <FormField label="Email">
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input
+              type="email"
+              value={emailValue}
+              onChange={(event) => setEmailValue(event.target.value)}
+              required
+            />
           </FormField>
           <FormField label="Пароль">
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input
+              type="password"
+              value={passwordValue}
+              onChange={(event) => setPasswordValue(event.target.value)}
+              required
+            />
           </FormField>
-          <PrimaryButton type="submit" disabled={isLoading}>
-            {isLoading ? 'Входим...' : 'Войти'}
+          <PrimaryButton type="submit" disabled={pending}>
+            {pending ? 'Входим...' : 'Войти'}
           </PrimaryButton>
-          <PageState error={error} />
+          <PageState error={errorText} />
           <p className="muted">
             Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
           </p>

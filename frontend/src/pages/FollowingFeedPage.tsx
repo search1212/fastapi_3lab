@@ -1,135 +1,151 @@
 import { useEffect, useState } from 'react'
 import { ApiError } from '../api/client'
-import { getFollowingFeed, getMyReactions, getReactionCounts, removeReaction, setReaction } from '../api/posts'
-import { useAuth } from '../auth/AuthContext'
+import {
+  getFollowingFeed,
+  getMyReactions,
+  getReactionCounts,
+  removeReaction,
+  setReaction,
+} from '../api/posts'
 import { followUser, getFollowing, getMe, getUserById, unfollowUser } from '../api/users'
+import { useAuth } from '../auth/AuthContext'
 import { PostCard } from '../components/PostCard'
 import { PageState } from '../components/ui/PageState'
 import type { PostAuthorPreview, PostRead, ReactionType } from '../types/api'
 
+const EMPTY_COUNTS: Record<ReactionType, number> = { like: 0, heart: 0, fire: 0, laugh: 0 }
+
 export function FollowingFeedPage() {
   const { accessToken } = useAuth()
-  const [posts, setPosts] = useState<PostRead[]>([])
-  const [authors, setAuthors] = useState<Record<number, PostAuthorPreview>>({})
-  const [followingMap, setFollowingMap] = useState<Record<number, boolean>>({})
-  const [myId, setMyId] = useState<number | null>(null)
-  const [reactions, setReactions] = useState<Record<number, ReactionType | null>>({})
-  const [reactionCounts, setReactionCounts] = useState<Record<number, Record<ReactionType, number>>>({})
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [items, setItems] = useState<PostRead[]>([])
+  const [authorsById, setAuthorsById] = useState<Record<number, PostAuthorPreview>>({})
+  const [followingById, setFollowingById] = useState<Record<number, boolean>>({})
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
+  const [myReactions, setMyReactions] = useState<Record<number, ReactionType | null>>({})
+  const [countsByPost, setCountsByPost] = useState<Record<number, Record<ReactionType, number>>>({})
+  const [loading, setLoading] = useState(true)
+  const [errorText, setErrorText] = useState<string | null>(null)
 
   useEffect(() => {
     if (!accessToken) return
-    const run = async () => {
-      setIsLoading(true)
-      setError(null)
+
+    const loadFeed = async () => {
+      setLoading(true)
+      setErrorText(null)
       try {
-        const data = await getFollowingFeed(accessToken)
-        setPosts(data)
-        const counts = await getReactionCounts(data.map((post) => post.id))
-        setReactionCounts(
+        const feed = await getFollowingFeed(accessToken)
+        setItems(feed)
+
+        const counts = await getReactionCounts(feed.map((entry) => entry.id))
+        setCountsByPost(
           Object.fromEntries(
-            counts.map((item) => [
-              item.post_id,
-              { like: item.like, heart: item.heart, fire: item.fire, laugh: item.laugh } as Record<ReactionType, number>,
+            counts.map((row) => [
+              row.post_id,
+              { like: row.like, heart: row.heart, fire: row.fire, laugh: row.laugh } as Record<
+                ReactionType,
+                number
+              >,
             ]),
           ),
         )
+
         const me = await getMe(accessToken)
-        setMyId(me.id)
+        setCurrentUserId(me.id)
+
         const following = await getFollowing(me.id, accessToken)
-        setFollowingMap(Object.fromEntries(following.map((user) => [user.id, true])))
+        setFollowingById(Object.fromEntries(following.map((person) => [person.id, true])))
 
-        const authorIds = Array.from(new Set(data.map((post) => post.author_id)))
-        const users = await Promise.all(authorIds.map((authorId) => getUserById(authorId, accessToken)))
-        setAuthors(Object.fromEntries(users.map((user) => [user.id, user])))
+        const authorIds = Array.from(new Set(feed.map((entry) => entry.author_id)))
+        const authors = await Promise.all(authorIds.map((authorId) => getUserById(authorId, accessToken)))
+        setAuthorsById(Object.fromEntries(authors.map((person) => [person.id, person])))
 
-        const existingReactions = await getMyReactions(accessToken)
-        setReactions(
-          Object.fromEntries(existingReactions.map((item) => [item.post_id, item.reaction_type])) as Record<
+        const reactions = await getMyReactions(accessToken)
+        setMyReactions(
+          Object.fromEntries(reactions.map((row) => [row.post_id, row.reaction_type])) as Record<
             number,
             ReactionType | null
           >,
         )
-      } catch (err) {
-        setError(err instanceof ApiError ? err.message : 'Не удалось загрузить ленту подписок')
+      } catch (failure) {
+        setErrorText(failure instanceof ApiError ? failure.message : 'Не удалось загрузить ленту подписок')
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     }
-    run()
+
+    loadFeed()
   }, [accessToken])
 
-  const onToggleFollowAuthor = async (authorId: number, isFollowing: boolean) => {
-    if (!accessToken || myId === authorId) return
+  const handleToggleFollow = async (authorId: number, isFollowing: boolean) => {
+    if (!accessToken || currentUserId === authorId) return
     try {
       if (isFollowing) {
         await unfollowUser(authorId, accessToken)
-        setFollowingMap((prev) => ({ ...prev, [authorId]: false }))
+        setFollowingById((previous) => ({ ...previous, [authorId]: false }))
       } else {
         await followUser(authorId, accessToken)
-        setFollowingMap((prev) => ({ ...prev, [authorId]: true }))
+        setFollowingById((previous) => ({ ...previous, [authorId]: true }))
       }
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Не удалось обновить подписку')
+    } catch (failure) {
+      setErrorText(failure instanceof ApiError ? failure.message : 'Не удалось обновить подписку')
     }
   }
 
-  const onReact = async (postId: number, reaction: ReactionType) => {
+  const handleReact = async (postId: number, nextReaction: ReactionType) => {
     if (!accessToken) return
     try {
-      const current = reactions[postId] ?? null
-      if (current === reaction) {
+      const previousReaction = myReactions[postId] ?? null
+      if (previousReaction === nextReaction) {
         await removeReaction(postId, accessToken)
-        setReactions((prev) => ({ ...prev, [postId]: null }))
-        setReactionCounts((prev) => {
-          const postCounts = prev[postId] ?? { like: 0, heart: 0, fire: 0, laugh: 0 }
+        setMyReactions((state) => ({ ...state, [postId]: null }))
+        setCountsByPost((state) => {
+          const current = state[postId] ?? { ...EMPTY_COUNTS }
           return {
-            ...prev,
+            ...state,
             [postId]: {
-              ...postCounts,
-              [reaction]: Math.max((postCounts[reaction] ?? 0) - 1, 0),
+              ...current,
+              [nextReaction]: Math.max((current[nextReaction] ?? 0) - 1, 0),
             },
           }
         })
         return
       }
 
-      await setReaction(postId, reaction, accessToken)
-      setReactions((prev) => ({ ...prev, [postId]: reaction }))
-      setReactionCounts((prev) => {
-        const postCounts = prev[postId] ?? { like: 0, heart: 0, fire: 0, laugh: 0 }
-        const nextCounts: Record<ReactionType, number> = { ...postCounts }
-        if (current) {
-          nextCounts[current] = Math.max((nextCounts[current] ?? 0) - 1, 0)
+      await setReaction(postId, nextReaction, accessToken)
+      setMyReactions((state) => ({ ...state, [postId]: nextReaction }))
+      setCountsByPost((state) => {
+        const current = state[postId] ?? { ...EMPTY_COUNTS }
+        const updated: Record<ReactionType, number> = { ...current }
+        if (previousReaction) {
+          updated[previousReaction] = Math.max((updated[previousReaction] ?? 0) - 1, 0)
         }
-        nextCounts[reaction] = (nextCounts[reaction] ?? 0) + 1
-        return { ...prev, [postId]: nextCounts }
+        updated[nextReaction] = (updated[nextReaction] ?? 0) + 1
+        return { ...state, [postId]: updated }
       })
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Не удалось поставить реакцию')
+    } catch (failure) {
+      setErrorText(failure instanceof ApiError ? failure.message : 'Не удалось поставить реакцию')
     }
   }
 
   return (
     <section>
       <PageState
-        loading={isLoading ? 'Загружаем посты...' : undefined}
-        error={error}
-        empty={!isLoading && !error && posts.length === 0 ? 'Пока нет постов от ваших подписок.' : null}
+        loading={loading ? 'Загружаем посты...' : undefined}
+        error={errorText}
+        empty={!loading && !errorText && items.length === 0 ? 'Пока нет постов от ваших подписок.' : null}
       />
       <div className="stack">
-        {posts.map((post) => (
+        {items.map((entry) => (
           <PostCard
-            key={post.id}
-            post={post}
-            author={authors[post.author_id]}
-            isOwnAuthor={myId === post.author_id}
-            isFollowingAuthor={Boolean(followingMap[post.author_id])}
-            onToggleFollowAuthor={onToggleFollowAuthor}
-            reaction={reactions[post.id] ?? null}
-            reactionCounts={reactionCounts[post.id]}
-            onReact={(reaction) => onReact(post.id, reaction)}
+            key={entry.id}
+            post={entry}
+            author={authorsById[entry.author_id]}
+            isOwnAuthor={currentUserId === entry.author_id}
+            isFollowingAuthor={Boolean(followingById[entry.author_id])}
+            onToggleFollowAuthor={handleToggleFollow}
+            reaction={myReactions[entry.id] ?? null}
+            reactionCounts={countsByPost[entry.id]}
+            onReact={(value) => handleReact(entry.id, value)}
           />
         ))}
       </div>

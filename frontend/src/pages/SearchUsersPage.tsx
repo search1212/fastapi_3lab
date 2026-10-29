@@ -1,69 +1,77 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../api/client'
-import { useAuth } from '../auth/AuthContext'
 import { searchUsers } from '../api/users'
-import type { UserPublic } from '../types/api'
+import { useAuth } from '../auth/AuthContext'
 import { FormField } from '../components/ui/FormField'
 import { GlassCard } from '../components/ui/GlassCard'
 import { PageState } from '../components/ui/PageState'
+import type { UserPublic } from '../types/api'
 
 export function SearchUsersPage() {
   const { accessToken } = useAuth()
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<UserPublic[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [searchText, setSearchText] = useState('')
+  const [matches, setMatches] = useState<UserPublic[]>([])
+  const [loading, setLoading] = useState(false)
+  const [errorText, setErrorText] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!accessToken || query.trim().length < 1) {
-      setResults([])
+    if (!accessToken || searchText.trim().length < 1) {
+      setMatches([])
       return
     }
+
     const timer = setTimeout(async () => {
-      setIsLoading(true)
-      setError(null)
+      setLoading(true)
+      setErrorText(null)
       try {
-        setResults(await searchUsers(query.trim(), accessToken))
-      } catch (err) {
-        setError(err instanceof ApiError ? err.message : 'Не удалось выполнить поиск')
+        setMatches(await searchUsers(searchText.trim(), accessToken))
+      } catch (failure) {
+        setErrorText(failure instanceof ApiError ? failure.message : 'Не удалось выполнить поиск')
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     }, 350)
+
     return () => clearTimeout(timer)
-  }, [query, accessToken])
+  }, [searchText, accessToken])
 
   return (
     <section>
       <GlassCard className="search-panel">
         <FormField label="Username или email">
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Введите запрос" />
+          <input
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
+            placeholder="Введите запрос"
+          />
         </FormField>
       </GlassCard>
       <PageState
-        loading={isLoading ? 'Ищем...' : undefined}
-        error={error}
-        empty={!isLoading && query && results.length === 0 ? 'Ничего не найдено.' : null}
+        loading={loading ? 'Ищем...' : undefined}
+        error={errorText}
+        empty={!loading && searchText && matches.length === 0 ? 'Ничего не найдено.' : null}
       />
       <div className="search-results">
-        {results.map((user) => (
-          <Link key={user.id} className="search-user-link" to={`/users/${user.id}`}>
+        {matches.map((person) => (
+          <Link key={person.id} className="search-user-link" to={`/users/${person.id}`}>
             <GlassCard className="search-user-card">
               <div className="search-user-head">
-                {user.avatar_url ? (
-                  <img className="search-user-avatar" src={user.avatar_url} alt={`Аватар ${user.username}`} />
+                {person.avatar_url ? (
+                  <img className="search-user-avatar" src={person.avatar_url} alt={`Аватар ${person.username}`} />
                 ) : (
-                  <span className="search-user-avatar search-user-avatar-fallback">{user.username.slice(0, 1).toUpperCase()}</span>
+                  <span className="search-user-avatar search-user-avatar-fallback">
+                    {person.username.slice(0, 1).toUpperCase()}
+                  </span>
                 )}
                 <div className="search-user-main">
-                  <strong>@{user.username}</strong>
-                  <p className="muted">{user.email}</p>
+                  <strong>@{person.username}</strong>
+                  <p className="muted">{person.email}</p>
                 </div>
               </div>
-              <p className="search-user-bio">{user.bio || 'Пользователь пока не добавил описание.'}</p>
+              <p className="search-user-bio">{person.bio || 'Пользователь пока не добавил описание.'}</p>
               <div className="meta">
-                <span>На сайте с {new Date(user.created_at).toLocaleDateString()}</span>
+                <span>На сайте с {new Date(person.created_at).toLocaleDateString()}</span>
               </div>
             </GlassCard>
           </Link>

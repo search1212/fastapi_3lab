@@ -11,7 +11,7 @@ import { RegisterPage } from './pages/RegisterPage'
 import { SearchUsersPage } from './pages/SearchUsersPage'
 import { UserProfilePage } from './pages/UserProfilePage'
 
-function RequireAuth({ children }: { children: ReactElement }) {
+function ProtectedRoute({ children }: { children: ReactElement }) {
   const { isAuthenticated } = useAuth()
   const location = useLocation()
 
@@ -22,7 +22,7 @@ function RequireAuth({ children }: { children: ReactElement }) {
   return children
 }
 
-function RequireGuest({ children }: { children: ReactElement }) {
+function GuestRoute({ children }: { children: ReactElement }) {
   const { isAuthenticated } = useAuth()
   if (isAuthenticated) {
     return <Navigate to="/" replace />
@@ -37,65 +37,65 @@ function App() {
         <Route
           path="/"
           element={
-            <RequireAuth>
+            <ProtectedRoute>
               <GlobalFeedPage />
-            </RequireAuth>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/me"
           element={
-            <RequireAuth>
+            <ProtectedRoute>
               <MyProfilePage />
-            </RequireAuth>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/my-posts"
           element={
-            <RequireAuth>
+            <ProtectedRoute>
               <MyPostsPage />
-            </RequireAuth>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/following"
           element={
-            <RequireAuth>
+            <ProtectedRoute>
               <FollowingFeedPage />
-            </RequireAuth>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/search"
           element={
-            <RequireAuth>
+            <ProtectedRoute>
               <SearchUsersPage />
-            </RequireAuth>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/users/:userId"
           element={
-            <RequireAuth>
+            <ProtectedRoute>
               <UserProfilePage />
-            </RequireAuth>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/login"
           element={
-            <RequireGuest>
+            <GuestRoute>
               <LoginPage />
-            </RequireGuest>
+            </GuestRoute>
           }
         />
         <Route
           path="/register"
           element={
-            <RequireGuest>
+            <GuestRoute>
               <RegisterPage />
-            </RequireGuest>
+            </GuestRoute>
           }
         />
         <Route path="*" element={<Navigate to="/login" replace />} />

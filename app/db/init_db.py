@@ -4,8 +4,6 @@ from app.db.session import engine
 
 
 async def init_db() -> None:
-    # Import references are required so SQLAlchemy registers mapped tables.
     _ = (User, AuthSession, Post, Subscription, Reaction)
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
-

@@ -7,27 +7,28 @@ from app.db.session import get_db_session
 from app.repositories.user_repository import UserRepository
 from app.services.tokens import decode_token
 
-bearer_scheme = HTTPBearer(auto_error=True)
+_bearer = HTTPBearer(auto_error=True)
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
     session: AsyncSession = Depends(get_db_session),
 ) -> User:
     try:
-        payload = decode_token(credentials.credentials)
-    except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token") from exc
-    if payload.get("type") != "access":
+        claims = decode_token(credentials.credentials)
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token") from error
+
+    if claims.get("type") != "access":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
-    user_id = payload.get("sub")
+
+    subject = claims.get("sub")
     try:
-        parsed_user_id = int(user_id)
-    except (TypeError, ValueError) as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject") from exc
+        account_id = int(subject)
+    except (TypeError, ValueError) as error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject") from error
 
-    user = await UserRepository(session).get_by_id(parsed_user_id)
-    if user is None:
+    account = await UserRepository(session).get_by_id(account_id)
+    if account is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-    return user
-
+    return account

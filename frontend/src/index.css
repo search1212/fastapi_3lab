@@ -1,18 +1,17 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap");
 
 :root {
-  --bg: #eef2f6;
-  --bg-accent: #dce7f2;
+  --bg: #f4f5f7;
   --card: #ffffff;
-  --line: #c9d6e5;
-  --text: #1a2433;
-  --muted: #5f7085;
-  --accent: #0f766e;
-  --accent-soft: #ccfbf1;
-  --danger: #b91c1c;
-  --ok: #15803d;
-  --shadow: 0 10px 28px rgba(26, 36, 51, 0.08);
-  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --line: #dde1e7;
+  --text: #2a3038;
+  --muted: #6b7380;
+  --accent: #4a647c;
+  --accent-soft: #e8eef3;
+  --danger: #9b4a4a;
+  --ok: #3f6b52;
+  --shadow: 0 1px 2px rgba(42, 48, 56, 0.04), 0 8px 24px rgba(42, 48, 56, 0.04);
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
   color: var(--text);
   background: var(--bg);
 }
@@ -24,36 +23,30 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 38%),
-    linear-gradient(180deg, var(--bg-accent), var(--bg) 42%);
-  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  background: var(--bg);
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
 }
 
 a {
   color: var(--accent);
 }
 
-.bg-orb,
-.bg-grid,
-.brand-mark,
 .page-eyebrow {
   display: none;
 }
 
 .container {
-  width: min(1040px, calc(100% - 28px));
+  width: min(980px, calc(100% - 32px));
   margin: 0 auto;
 }
 
 .header {
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(8px);
+  background: #fafbfc;
 }
 
 .nav {
-  padding: 16px 0;
+  padding: 14px 0;
 }
 
 .brand-button {
@@ -63,48 +56,45 @@ a {
 
 .brand {
   margin: 0;
-  font-size: 1.55rem;
-  letter-spacing: -0.03em;
-  color: var(--accent);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
 }
 
 .brand-tagline {
   margin: 2px 0 0;
   color: var(--muted);
-  font-size: 0.86rem;
-}
-
-.brand-tagline-dot {
-  display: none;
+  font-size: 0.84rem;
 }
 
 .workspace {
   display: grid;
-  grid-template-columns: 1fr 220px;
-  gap: 22px;
-  padding: 24px 0 48px;
+  grid-template-columns: 1fr 200px;
+  gap: 20px;
+  padding: 22px 0 44px;
 }
 
 .right-menu {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 14px;
+  border-radius: 10px;
+  padding: 12px;
   box-shadow: var(--shadow);
   height: fit-content;
 }
 
 .menu-label {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .menu-vertical {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .menu-button {
@@ -112,8 +102,8 @@ a {
   text-decoration: none;
   color: var(--text);
   padding: 8px 10px;
-  border-radius: 10px;
-  transition: background 0.15s ease, color 0.15s ease;
+  border-radius: 8px;
+  transition: background 0.15s ease;
 }
 
 .menu-button:hover,
@@ -124,14 +114,14 @@ a {
 
 .page-title {
   margin: 0 0 14px;
-  font-size: 1.45rem;
-  letter-spacing: -0.02em;
+  font-size: 1.28rem;
+  font-weight: 600;
 }
 
 .glass-card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 10px;
   padding: 16px;
   box-shadow: var(--shadow);
 }
@@ -140,39 +130,64 @@ a {
 .form,
 .field {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 input,
 textarea,
 select {
   width: 100%;
-  background: #f7fafc;
+  background: #fff;
   color: var(--text);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 9px 11px;
   font: inherit;
 }
 
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid rgba(15, 118, 110, 0.28);
-  border-color: var(--accent);
+  outline: 2px solid rgba(74, 100, 124, 0.2);
+  border-color: #9aa9b8;
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field-input {
+  padding-right: 44px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  padding: 0;
+}
+
+.password-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .btn {
   border: none;
-  border-radius: 10px;
-  padding: 9px 14px;
+  border-radius: 8px;
+  padding: 8px 12px;
   cursor: pointer;
   font: inherit;
-  transition: transform 0.12s ease, opacity 0.12s ease;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
 }
 
 .btn-primary {
@@ -182,9 +197,14 @@ select:focus {
 }
 
 .btn-secondary {
-  background: #edf2f7;
+  background: #f0f2f5;
   color: var(--text);
   border: 1px solid var(--line);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .small {
@@ -195,17 +215,17 @@ select:focus {
 .profile-card,
 .user-profile-card {
   display: grid;
-  grid-template-columns: 1fr 220px;
-  gap: 18px;
+  grid-template-columns: 1fr 210px;
+  gap: 16px;
 }
 
 .profile-photo-wrap {
-  border: 1px dashed var(--line);
-  border-radius: 14px;
-  min-height: 180px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  min-height: 170px;
   display: grid;
   place-items: center;
-  background: #f8fafc;
+  background: #f8f9fb;
 }
 
 .profile-photo,
@@ -217,19 +237,19 @@ select:focus {
 }
 
 .profile-photo {
-  width: 160px;
-  height: 160px;
-  border-radius: 12px;
+  width: 150px;
+  height: 150px;
+  border-radius: 10px;
 }
 
 .user-profile-avatar {
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
 }
 
 .search-user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
 }
 
 .author-avatar {
@@ -275,7 +295,7 @@ select:focus {
   position: absolute;
   left: 0;
   top: 34px;
-  width: 230px;
+  width: 220px;
   z-index: 2;
 }
 
@@ -306,13 +326,19 @@ select:focus {
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 4px 10px;
-  background: #f8fafc;
+  background: #f8f9fb;
 }
 
 .active-reaction {
-  border-color: var(--accent);
+  border-color: #9aa9b8;
   color: var(--accent);
   background: var(--accent-soft);
+}
+
+.reaction-locked {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--muted);
 }
 
 .search-results {
@@ -363,7 +389,6 @@ select:focus {
 }
 
 .editor-meta {
-  font-family: "IBM Plex Mono", monospace;
   font-size: 0.78rem;
   color: var(--muted);
 }

@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class Settings(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    app_name: str = "FastAPI 3Lab"
+    app_name: str = "Sfera"
     database_url: str = Field(default="sqlite+aiosqlite:///./app.db")
     debug: bool = False
     jwt_secret_key: str = "change-me-in-prod"
@@ -18,7 +18,7 @@ class Settings(BaseModel):
 def get_settings() -> Settings:
     debug_raw = os.getenv("DEBUG", "false").lower()
     return Settings(
-        app_name=os.getenv("APP_NAME", "FastAPI 3Lab"),
+        app_name=os.getenv("APP_NAME", "Sfera"),
         database_url=os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./app.db"),
         debug=debug_raw in {"1", "true", "yes", "on"},
         jwt_secret_key=os.getenv("JWT_SECRET_KEY", "change-me-in-prod"),

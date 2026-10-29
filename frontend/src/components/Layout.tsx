@@ -1,6 +1,8 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 
+const APP_NAME = 'Sfera'
+
 function resolveTitle(pathname: string, authenticated: boolean): string {
   if (!authenticated) {
     return pathname === '/register' ? 'Регистрация' : 'Вход'
@@ -11,7 +13,7 @@ function resolveTitle(pathname: string, authenticated: boolean): string {
   if (pathname === '/me') return 'Мой профиль'
   if (pathname === '/search') return 'Найти человека'
   if (pathname.startsWith('/users/')) return 'Профиль пользователя'
-  return 'Wgram'
+  return APP_NAME
 }
 
 export function Layout() {
@@ -25,7 +27,7 @@ export function Layout() {
       <header className="header">
         <div className="container nav">
           <Link to="/" className="brand-button">
-            <h1 className="brand">Wgram</h1>
+            <h1 className="brand">{APP_NAME}</h1>
           </Link>
           <p className="brand-tagline">социальная сеть</p>
         </div>
@@ -34,7 +36,6 @@ export function Layout() {
         <main className="content">
           {isAuthenticated && (
             <div className="page-head">
-              <span className="page-eyebrow">Wgram</span>
               <div className="page-title">{resolveTitle(pathname, isAuthenticated)}</div>
             </div>
           )}

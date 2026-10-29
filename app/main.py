@@ -44,9 +44,9 @@ app.include_router(posts_router)
 async def home() -> str:
     return """
     <html>
-      <head><title>FastAPI 3Lab</title></head>
+      <head><title>Sfera API</title></head>
       <body>
-        <h1>FastAPI 3Lab</h1>
+        <h1>Sfera API</h1>
         <p>API is running.</p>
         <p>Health check: <a href="/health">/health</a></p>
         <p>Swagger: <a href="/docs">/docs</a></p>

@@ -92,6 +92,11 @@ export function GlobalFeedPage() {
 
   const handleReact = async (postId: number, nextReaction: ReactionType) => {
     if (!accessToken) return
+    const target = items.find((entry) => entry.id === postId)
+    if (target && currentUserId === target.author_id) {
+      setErrorText('Нельзя ставить реакции на собственные посты')
+      return
+    }
     try {
       const previousReaction = myReactions[postId] ?? null
       if (previousReaction === nextReaction) {

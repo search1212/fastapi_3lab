@@ -95,6 +95,34 @@ async def test_post_edit_requires_owner_permissions(client: AsyncClient):
     assert allowed.json()["is_edited"] is True
 
 
+@pytest.mark.asyncio
+async def test_login_rejects_bad_password_with_russian_message(client: AsyncClient):
+    await register_and_login(client, "bob@example.com", "bob", "password123")
+    failed = await client.post("/auth/login", json={"email": "bob@example.com", "password": "wrongpass"})
+    assert failed.status_code == 401
+    assert failed.json()["detail"] == "Неверный логин или пароль"
+
+
+@pytest.mark.asyncio
+async def test_cannot_react_to_own_post(client: AsyncClient):
+    author = await register_and_login(client, "owner@example.com", "owner", "password123")
+    created = await client.post(
+        "/posts",
+        headers={"Authorization": f"Bearer {author['access_token']}"},
+        json={"content": "Own post"},
+    )
+    assert created.status_code == 201
+    post_id = created.json()["id"]
+
+    reaction = await client.put(
+        f"/posts/{post_id}/reaction",
+        headers={"Authorization": f"Bearer {author['access_token']}"},
+        json={"reaction_type": "like"},
+    )
+    assert reaction.status_code == 400
+    assert "собственн" in reaction.json()["detail"].lower()
+
+
 def teardown_module():
     db_file = Path("test.db")
     try:

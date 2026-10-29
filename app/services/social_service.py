@@ -40,6 +40,11 @@ class SocialService:
         target_post: Post | None = await self._posts.get_by_id(post_id)
         if target_post is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+        if target_post.author_id == current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Нельзя ставить реакции на собственные посты",
+            )
 
         await self._social.set_reaction(current_user.id, post_id, reaction_type)
         await self._db.commit()
